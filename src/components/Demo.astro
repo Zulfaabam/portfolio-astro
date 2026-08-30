@@ -1,0 +1,377 @@
+<section class="demo-section">
+  <h2 class="section-subheading">Journey</h2>
+  <p class="section-desc">
+    This one is from chapter 1. Press run, then drag the sliders to feel the
+    difference between starting fast and finishing fast.
+  </p>
+
+  <!-- Simulator Card -->
+  <div class="simulator-card">
+    <!-- Text Stream Box -->
+    <div class="stream-display" id="streamDisplay">
+      <span class="placeholder-text" id="streamText"
+        >Press run to stream a response.</span
+      >
+    </div>
+
+    <!-- Metrics Row -->
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <span class="metric-label">TTFT</span>
+        <div class="metric-value">
+          <span class="value-number" id="valTtft">400</span>
+          <span class="value-unit">ms</span>
+        </div>
+        <span class="metric-desc">Compute bound, scales with prompt length</span
+        >
+      </div>
+
+      <div class="metric-item">
+        <span class="metric-label">TPS</span>
+        <div class="metric-value">
+          <span class="value-number" id="valTps">30</span>
+          <span class="value-unit">/s</span>
+        </div>
+        <span class="metric-desc"
+          >Bandwidth bound: the same full model read every token</span
+        >
+      </div>
+
+      <div class="metric-item">
+        <span class="metric-label">Total</span>
+        <div class="metric-value">
+          <span class="value-number" id="valTotal">1.4</span>
+          <span class="value-unit">s</span>
+        </div>
+        <span class="metric-desc">31 words end to end</span>
+      </div>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="controls-panel">
+      <div class="controls-header">
+        <svg
+          class="control-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="6" cy="6" r="3"></circle>
+          <circle cx="6" cy="18" r="3"></circle>
+          <line x1="20" y1="4" x2="8.5" y2="4" stroke-linecap="round"></line>
+          <line x1="20" y1="12" x2="4" y2="12" stroke-linecap="round"></line>
+          <line x1="20" y1="20" x2="8.5" y2="20" stroke-linecap="round"></line>
+        </svg>
+        <span>Adjust</span>
+      </div>
+
+      <div class="sliders-row">
+        <div class="slider-control">
+          <div class="slider-box">
+            <span class="slider-name">Time to first token</span>
+            <div class="slider-value-badge" id="ttftBadge">400ms</div>
+          </div>
+          <input
+            type="range"
+            id="sliderTtft"
+            min="50"
+            max="1500"
+            step="50"
+            value="400"
+            class="range-slider"
+          />
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-box">
+            <span class="slider-name">Tokens per second</span>
+            <div class="slider-value-badge" id="tpsBadge">30/s</div>
+          </div>
+          <input
+            type="range"
+            id="sliderTps"
+            min="5"
+            max="100"
+            step="5"
+            value="30"
+            class="range-slider"
+          />
+          <span class="slider-subtext" id="tpsSubtext">33ms between tokens</span
+          >
+        </div>
+      </div>
+
+      <div class="controls-action">
+        <button id="runBtn" class="btn-run">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="run-icon">
+            <polygon points="5,3 19,12 5,21"></polygon>
+          </svg>
+          <span>Run</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Figure Caption -->
+  <div class="figure-caption">
+    <p>
+      <strong>Figure 1.4. Time to first token versus tokens per second.</strong> Two
+      numbers, two phases, two bottlenecks. A response that starts instantly and trickles
+      can feel faster than one that pauses and then dumps, even when the second finishes
+      first.
+    </p>
+    <span class="figure-subcaption">Illustrative numbers</span>
+  </div>
+</section>
+
+<style>
+  /* Demo Section */
+  .demo-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .section-subheading {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #f9fafb;
+    margin: 0;
+  }
+
+  .section-desc {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #9ca3af;
+  }
+
+  /* Simulator Card */
+  .simulator-card {
+    background-color: #111317;
+    border: 1px solid #1e2229;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .stream-display {
+    min-height: 90px;
+    background-color: #0b0c0f;
+    border: 1px solid #1a1d24;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.875rem;
+    color: #e5e7eb;
+    line-height: 1.5;
+  }
+
+  .placeholder-text {
+    font-style: italic;
+    color: #6b7280;
+    font-family: inherit;
+  }
+
+  /* Metrics Grid */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-top: 1px solid #1e2229;
+    border-bottom: 1px solid #1e2229;
+    padding: 1rem 0;
+  }
+
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0 1rem;
+  }
+
+  .metric-item:first-child {
+    padding-left: 0;
+  }
+
+  .metric-item:not(:last-child) {
+    border-right: 1px solid #1e2229;
+  }
+
+  .metric-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .metric-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.15rem;
+  }
+
+  .value-number {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .value-unit {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  .metric-desc {
+    font-size: 0.725rem;
+    line-height: 1.35;
+    color: #6b7280;
+  }
+
+  /* Controls Panel */
+  .controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .controls-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #9ca3af;
+  }
+
+  .control-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .sliders-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .slider-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .slider-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #171a21;
+    border: 1px solid #232832;
+    border-radius: 6px;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .slider-name {
+    font-size: 0.775rem;
+    color: #9ca3af;
+  }
+
+  .slider-value-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.775rem;
+    color: #d1d5db;
+    font-weight: 500;
+  }
+
+  .range-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #232832;
+    border-radius: 2px;
+    outline: none;
+    margin: 0.25rem 0;
+  }
+
+  .range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #00bd7e;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0, 189, 126, 0.5);
+  }
+
+  .slider-subtext {
+    font-size: 0.7rem;
+    color: #6b7280;
+  }
+
+  .controls-action {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 0.25rem;
+  }
+
+  .btn-run {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: #009360;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .btn-run:hover {
+    background-color: #00bd7e;
+  }
+
+  .run-icon {
+    width: 11px;
+    height: 11px;
+  }
+
+  /* Figure Caption */
+  .figure-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-top: 0.25rem;
+  }
+
+  .figure-caption p {
+    margin: 0;
+    font-size: 0.825rem;
+    line-height: 1.5;
+    color: #9ca3af;
+  }
+
+  .figure-caption strong {
+    color: #e5e7eb;
+    font-weight: 600;
+  }
+
+  .figure-subcaption {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+</style>

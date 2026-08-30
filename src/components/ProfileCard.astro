@@ -1,0 +1,99 @@
+<div class="book-cover">
+  <div class="cover-dots"></div>
+  <div class="cover-content">
+    <div class="cover-header">
+      <svg class="cover-icon" viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="2" width="9" height="9" rx="2.5" fill="white"></rect>
+        <rect x="13" y="2" width="9" height="9" rx="2.5" fill="white"></rect>
+        <rect x="2" y="13" width="9" height="9" rx="2.5" fill="white"></rect>
+        <rect
+          x="13"
+          y="13"
+          width="9"
+          height="9"
+          rx="2.5"
+          fill="white"
+          opacity="0.6"></rect>
+      </svg>
+    </div>
+
+    <div class="cover-titles">
+      <h2 class="cover-title">Zulfa Fatah<br />Akbar Ahmad</h2>
+      <p class="cover-subtitle">Software Engineer</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Book Cover Card */
+  .book-cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1.35;
+    /* background: linear-gradient(145deg, #00bd7e 0%, #009360 50%, #007048 100%); */
+    background: url("/src/assets/abam.jpg") center / cover no-repeat;
+    background-color: hsla(0, 0%, 0%, 0.3);
+    background-blend-mode: overlay;
+    /* background-size: cover; */
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow:
+      0 16px 36px -10px rgba(0, 189, 126, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    color: #ffffff;
+  }
+
+  /* .cover-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+      rgba(0, 48, 30, 0.35) 1.5px,
+      transparent 1.5px
+    );
+    background-size: 10px 10px;
+    pointer-events: none;
+  } */
+
+  .cover-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .cover-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .cover-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cover-title {
+    font-size: 1.75rem;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin: 0;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  .cover-subtitle {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    text-transform: uppercase;
+  }
+</style>

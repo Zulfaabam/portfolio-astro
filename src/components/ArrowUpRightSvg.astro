@@ -1,5 +1,5 @@
 ---
-const { className } = Astro.props;
+const { class: className, ...rest } = Astro.props;
 ---
 
 <svg
@@ -8,6 +8,7 @@ const { className } = Astro.props;
   fill="none"
   stroke="currentColor"
   stroke-width="2"
+  {...rest}
 >
   <path
     d="M7 17L17 7M17 7H7M17 7V17"

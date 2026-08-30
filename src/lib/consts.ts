@@ -1,6 +1,27 @@
 export const INTRO =
   "Software Engineer with 3+ years of experience building production-grade web applications using React, Next.js, and TypeScript. Experienced in developing scalable web app, maintainable UI architectures, integrating REST APIs, and collaborating with cross-functional teams. Now focusing on C# .NET project at Formulatrix.";
 
+export const MINI_JOURNEYS = [
+  {
+    id: 1,
+    job: "Software Engineer Intern @ Formulatrix",
+    place: "Salatiga, Indonesia",
+    year: "Now",
+  },
+  {
+    id: 2,
+    job: "Frontend Dev @ Eksad",
+    place: "Jakarta, Indonesia",
+    year: "2025",
+  },
+  {
+    id: 3,
+    job: "Frontend Dev @ Bukit Vista",
+    place: "Bali, Indonesia",
+    year: "2022 - 2024",
+  },
+];
+
 export const socmedList = [
   {
     id: 1,
@@ -59,27 +80,6 @@ export const techStack = [
   { name: "Next.js", id: 2 },
   { name: "TailwindCSS", id: 3 },
   { name: "TypeScript", id: 8 },
-];
-
-export const MINI_JOURNEYS = [
-  {
-    id: 1,
-    job: "Software Engineer Intern @ Formulatrix",
-    place: "Salatiga, Indonesia",
-    year: "Now",
-  },
-  {
-    id: 2,
-    job: "Frontend Dev @ Eksad",
-    place: "Jakarta, Indonesia",
-    year: "2025",
-  },
-  {
-    id: 3,
-    job: "Frontend Dev @ Bukit Vista",
-    place: "Bali, Indonesia",
-    year: "2022 - 2024",
-  },
 ];
 
 export const galleryImages = [

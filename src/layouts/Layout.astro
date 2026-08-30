@@ -1,3 +1,7 @@
+---
+import { Font } from "astro:assets";
+---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -7,12 +11,7 @@
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>Abams</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <Font cssVariable="--font-jetbrains-mono" />
   </head>
   <body>
     <slot />
@@ -34,16 +33,7 @@
     min-height: 100%;
     background-color: #090a0c;
     color: #e5e7eb;
-    font-family:
-      "Inter",
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      Roboto,
-      Oxygen,
-      Ubuntu,
-      Cantarell,
-      sans-serif;
+    font-family: var(--font-jetbrains-mono), monospace;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
