@@ -2,34 +2,13 @@
 import ArrowUpRightSvg from "./ArrowUpRightSvg.astro";
 import Nav from "./Nav.astro";
 import ProfileCard from "./ProfileCard.astro";
-
-import { supabase } from "../lib/supabase";
 import { getEntry } from "astro:content";
-
-const { data: projects, error } = await supabase
-  .from("projects")
-  .select(
-    `*,
-        project_tech_stack (
-          tech_stack (
-            id,
-            name
-          )
-        )`,
-  )
-  .eq("is_featured", true);
 
 const homeContent = await getEntry("home", "home");
 
 const miniJourneys = homeContent?.data?.miniJourneys?.sort(
   (a, b) => b.id - a.id,
 );
-
-console.log("homecontent", homeContent?.data);
-
-if (error) {
-  console.error(error);
-}
 ---
 
 <div class="page-wrapper">
@@ -45,7 +24,16 @@ if (error) {
         <div class="sidebar-actions">
           <a href="#read" class="btn btn-primary">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="6,4 20,12 6,20"></polygon>
+              <path
+                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z"
+              ></path>
+              <path
+                d="M3 7l9 6 9-6"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
             </svg>
             <span>View My Work</span>
           </a>
@@ -58,14 +46,21 @@ if (error) {
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="8" y1="6" x2="21" y2="6" stroke-linecap="round"></line>
-              <line x1="8" y1="12" x2="21" y2="12" stroke-linecap="round"
-              ></line>
-              <line x1="8" y1="18" x2="21" y2="18" stroke-linecap="round"
-              ></line>
-              <circle cx="4" cy="6" r="1.5" fill="currentColor"></circle>
-              <circle cx="4" cy="12" r="1.5" fill="currentColor"></circle>
-              <circle cx="4" cy="18" r="1.5" fill="currentColor"></circle>
+              <path
+                d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+              <polyline
+                points="7 10 12 15 17 10"
+                stroke-linecap="round"
+                stroke-linejoin="round"></polyline>
+              <line
+                x1="12"
+                y1="15"
+                x2="12"
+                y2="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"></line>
             </svg>
             <span>Download Resume</span>
           </a>
