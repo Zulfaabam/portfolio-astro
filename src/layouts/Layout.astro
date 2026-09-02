@@ -1,5 +1,6 @@
 ---
 import { Font } from "astro:assets";
+import { ClientRouter } from "astro:transitions";
 ---
 
 <!doctype html>
@@ -12,6 +13,7 @@ import { Font } from "astro:assets";
     <meta name="generator" content={Astro.generator} />
     <title>Abams</title>
     <Font cssVariable="--font-jetbrains-mono" />
+    <ClientRouter />
   </head>
   <body>
     <slot />
