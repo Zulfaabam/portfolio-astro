@@ -1,0 +1,325 @@
+---
+import "drawably/style.css";
+import "drawably/font.css";
+import { getEntry } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+
+const homeContent = await getEntry("home", "home");
+const miniJourneys =
+  homeContent?.data?.miniJourneys?.sort((a, b) => b.id - a.id) ?? [];
+const projects = homeContent?.data?.featuredProjects ?? [];
+---
+
+<Layout>
+  <div class="sketch-page">
+    <Nav />
+    <div class="sketch-layout">
+      <aside class="sketch-sidebar">
+        <div class="sidebar-stack">
+          <div class="profile-card drawably-card" data-drawably-card>
+            <span class="profile-mark">✦</span>
+            <div>
+              <h2>Zulfa Fatah<br />Akbar Ahmad</h2>
+              <p>Software Engineer</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="drawably-button action-primary" data-drawably-button
+              >View My Work</button
+            >
+            <button
+              class="drawably-button action-secondary"
+              data-drawably-button>Download Resume</button
+            >
+          </div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="intro">
+          <span class="drawably-badge" data-drawably-badge>WELCOME</span>
+          <h1>Hi, I'm Abam!</h1>
+          <p>{homeContent?.data?.intro}</p>
+        </section>
+
+        <section class="chapters">
+          <div class="chapter">
+            <h3><span>Journey</span><span class="arrow">↗</span></h3>
+            <ul class="drawably-list" data-drawably-list>
+              {
+                miniJourneys.map((journey, index) => (
+                  <li>
+                    <>
+                      <span class="number">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span>{journey.job}</span>
+                      <small>
+                        {journey.place} · {journey.year}
+                      </small>
+                    </>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          <div class="chapter">
+            <h3><span>Projects</span><span class="arrow">↗</span></h3>
+            <div class="project-list">
+              {
+                projects.map((project, index) => (
+                  <article class="project drawably-card" data-drawably-card>
+                    <span class="number">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <>
+                        <strong>{project.title}</strong>
+                        <small>
+                          {project.repository
+                            ? "Repository available"
+                            : "Private repository"}{" "}
+                          · {project.demo ? "Live demo" : "Demo coming soon"}
+                        </small>
+                      </>
+                    </div>
+                    <span class="project-arrow">↗</span>
+                  </article>
+                ))
+              }
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import {
+    drawablyBadge,
+    drawablyButton,
+    drawablyCard,
+    drawablyList,
+  } from "drawably";
+
+  document.querySelectorAll<HTMLElement>("[data-drawably-card]").forEach((el) =>
+    drawablyCard(el, {
+      roughness: 0.8,
+      boil: 0.2,
+      // fill: "#2724d1",
+      // paper: "#2724d1",
+    }),
+  );
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-drawably-button]")
+    .forEach((el) =>
+      drawablyButton(el, {
+        roughness: 0.8,
+        boil: 0.2,
+        variant: el.classList.contains("action-primary") ? "solid" : "outline",
+      }),
+    );
+  document
+    .querySelectorAll<HTMLElement>("[data-drawably-badge]")
+    .forEach((el) => drawablyBadge(el, { variant: "scribble" }));
+  document
+    .querySelectorAll<HTMLUListElement>("[data-drawably-list]")
+    .forEach((el) => drawablyList(el, { marker: "dash" }));
+</script>
+
+<style>
+  .sketch-page {
+    --color-white: #e3e3e1;
+    --color-blue: #2724d1;
+    --color-green: #188a42;
+    --color-gray: #a1a1aa;
+    --color-black: #000000;
+    --color-red: #d12724;
+    --drawably-stroke: var(--color-black);
+    --drawably-fill: var(--color-black);
+    --drawably-error: var(--color-red);
+    --drawably-success: var(--color-green);
+    min-height: 100vh;
+    background: var(--color-white);
+    color: var(--color-black);
+    font-family: "Drawably Pen", sans-serif;
+  }
+  :global(.sketch-page *) {
+    font-family: "Drawably Pen", sans-serif;
+  }
+  .sketch-layout {
+    max-width: 1100px;
+    margin: auto;
+    padding: 3rem 1.5rem 6rem;
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    gap: 4rem;
+  }
+  .sidebar-stack {
+    position: sticky;
+    top: 5rem;
+    display: grid;
+    gap: 1rem;
+  }
+  .profile-card {
+    aspect-ratio: 1 / 1.35;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* background: var(--drawably-fill); */
+    color: var(--color-black);
+    --drawably-stroke: var(--color-black);
+    --drawably-fill: var(--color-blue);
+  }
+  .profile-mark {
+    font-size: 2rem;
+  }
+  .profile-card h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.05;
+  }
+  .profile-card p {
+    margin: 0.75rem 0 0;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .actions {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .drawably-button {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font: inherit;
+    cursor: pointer;
+  }
+  .action-primary {
+    color: var(--color-white);
+    --drawably-stroke: var(--color-black);
+    --drawably-fill: var(--color-green);
+  }
+  .action-secondary {
+    color: var(--color-black);
+    --drawably-stroke: var(--color-blue);
+    --drawably-fill: var(--color-white);
+  }
+  .content {
+    display: grid;
+    gap: 3.5rem;
+  }
+  .intro {
+    display: grid;
+    gap: 1rem;
+  }
+  .drawably-badge {
+    width: max-content;
+    padding: 0.2rem 0.55rem;
+    color: var(--color-blue);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+  }
+  .intro h1 {
+    margin: 0;
+    color: var(--color-black);
+    font-size: 1.75rem;
+  }
+  .intro p {
+    margin: 0;
+    color: var(--color-gray);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    white-space: pre-line;
+  }
+  .chapters {
+    display: grid;
+    gap: 2.25rem;
+  }
+  .chapter {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .chapter h3 {
+    margin: 0;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    color: var(--color-black);
+    font-size: 1.1rem;
+  }
+  .arrow,
+  .project-arrow {
+    color: var(--color-green);
+  }
+  .drawably-list {
+    margin: 0;
+    padding: 0.4rem 1rem;
+    background: var(--color-white);
+  }
+  .drawably-list li {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    gap: 0.8rem;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-gray);
+    color: var(--color-black);
+    font-size: 0.875rem;
+  }
+  .drawably-list li:last-child {
+    border-bottom: 0;
+  }
+  .number {
+    color: var(--color-blue);
+    font-size: 0.75rem;
+  }
+  .drawably-list small,
+  .project small {
+    color: var(--color-gray);
+    font-size: 0.7rem;
+  }
+  .project-list {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .project {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    gap: 0.8rem;
+    align-items: center;
+    padding: 1rem;
+    background: var(--color-white);
+    --drawably-stroke: var(--color-blue);
+    --drawably-fill: var(--color-white);
+  }
+  .project strong,
+  .project small {
+    display: block;
+  }
+  .project small {
+    margin-top: 0.35rem;
+  }
+  @media (max-width: 860px) {
+    .sketch-layout {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      padding: 1.5rem 1rem 4rem;
+    }
+    .sidebar-stack {
+      position: static;
+      max-width: 320px;
+      margin: auto;
+    }
+    .drawably-list li {
+      grid-template-columns: 2rem 1fr;
+    }
+    .drawably-list small {
+      grid-column: 2;
+    }
+  }
+</style>
