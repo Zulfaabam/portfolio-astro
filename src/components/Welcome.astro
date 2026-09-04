@@ -1,7 +1,9 @@
 ---
 import ArrowUpRightSvg from "./ArrowUpRightSvg.astro";
+import ChapterCard from "./ChapterCard.astro";
 import Nav from "./Nav.astro";
 import ProfileCard from "./ProfileCard.astro";
+import ProjectTooltipCard from "../components/ProjectTooltipCard.astro";
 import { getEntry } from "astro:content";
 
 const homeContent = await getEntry("home", "home");
@@ -86,19 +88,30 @@ const miniJourneys = homeContent?.data?.miniJourneys?.sort(
             <ArrowUpRightSvg className="header-arrow" />
           </a>
 
-          <div class="chapter-card">
+          <ChapterCard>
             {
               miniJourneys?.map((journey, index) => (
-                <div class="lesson-row">
+                <div
+                  class="lesson-row journey-row"
+                  tabindex="0"
+                  aria-describedby={`journey-tooltip-${journey.id}`}
+                >
                   <span class="lesson-icon">
                     <ArrowUpRightSvg />
                   </span>
                   <span class="lesson-num">{index + 1}</span>
                   <span class="lesson-title">{journey.job}</span>
+                  <span
+                    class="hint-content"
+                    id={`journey-tooltip-${journey.id}`}
+                    role="tooltip"
+                  >
+                    {journey.place} · {journey.year}
+                  </span>
                 </div>
               ))
             }
-          </div>
+          </ChapterCard>
         </div>
 
         <!-- Chapter 1 -->
@@ -108,19 +121,46 @@ const miniJourneys = homeContent?.data?.miniJourneys?.sort(
             <ArrowUpRightSvg class="header-arrow" />
           </a>
 
-          <div class="chapter-card">
+          <ChapterCard>
             {
               homeContent?.data?.featuredProjects?.map((p, index) => (
-                <div class="lesson-row">
+                <div
+                  class="lesson-row project-row"
+                  tabindex="0"
+                  aria-describedby={`project-tooltip-${p.id}`}
+                >
                   <span class="lesson-icon">
                     <ArrowUpRightSvg />
                   </span>
                   <span class="lesson-num">{index + 1}</span>
                   <span class="lesson-title">{p.title}</span>
+                  <div
+                    class="project-tooltip"
+                    id={`project-tooltip-${p.id}`}
+                    role="tooltip"
+                  >
+                    <svg
+                      class="branch-path-svg"
+                      viewBox="0 0 180 70"
+                      aria-hidden="true"
+                    >
+                      <path
+                        class="branch-line"
+                        d="M145,0 C145,34 25,28 25,70"
+                      />
+                      <circle class="branch-dot" cx="25" cy="70" r="3" />
+                    </svg>
+                    <div class="project-tooltip-cards">
+                      <ProjectTooltipCard
+                        sourceAvailable={Boolean(p.repository)}
+                        demoAvailable={Boolean(p.demo)}
+                      />
+                    </div>
+                  </div>
                 </div>
               ))
             }
-          </div>
+          </ChapterCard>
         </div>
       </section>
     </main>
@@ -383,15 +423,6 @@ const miniJourneys = homeContent?.data?.miniJourneys?.sort(
     transform: translate(2px, -2px);
   }
 
-  .chapter-card {
-    background-color: #111317;
-    border: 1px solid #1e2229;
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
   .lesson-row {
     display: flex;
     align-items: center;
@@ -403,6 +434,16 @@ const miniJourneys = homeContent?.data?.miniJourneys?.sort(
     transition:
       background-color 0.15s ease,
       color 0.15s ease;
+  }
+
+  .journey-row {
+    position: relative;
+    cursor: default;
+  }
+
+  .project-row {
+    position: relative;
+    cursor: default;
   }
 
   .lesson-row:last-child {
@@ -447,6 +488,144 @@ const miniJourneys = homeContent?.data?.miniJourneys?.sort(
     font-weight: 500;
   }
 
+  /* Journey tooltip */
+  .hint-content {
+    position: absolute;
+    right: 2.75rem;
+    bottom: calc(100% + 1.8rem);
+    z-index: 4;
+    width: max-content;
+    max-width: 240px;
+    padding-bottom: 0.9rem;
+    color: #f9fafb;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.45;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+  .hint-content::before,
+  .hint-content::after {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    content: "";
+    background: #e5e7eb;
+  }
+
+  .hint-content::before {
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+  }
+
+  .hint-content::after {
+    width: 68px;
+    transform: rotate(135deg) scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease 0.12s;
+  }
+
+  .journey-row:hover .hint-content,
+  .journey-row:focus-visible .hint-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .journey-row:hover .hint-content::before,
+  .journey-row:focus-visible .hint-content::before {
+    transform: scaleX(1);
+  }
+
+  .journey-row:hover .hint-content::after,
+  .journey-row:focus-visible .hint-content::after {
+    transform: rotate(135deg) scaleX(1);
+  }
+
+  .journey-row:focus-visible {
+    outline: 2px solid #00bd7e;
+    outline-offset: 2px;
+  }
+
+  /* Project tooltip */
+  .project-tooltip {
+    position: absolute;
+    right: 1rem;
+    bottom: calc(100% + 4.5rem);
+    z-index: 10;
+    width: min(260px, calc(100vw - 2rem));
+    pointer-events: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(0.5rem);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+  .branch-path-svg {
+    position: absolute;
+    top: 100%;
+    right: 0.5rem;
+    width: 180px;
+    height: 70px;
+    overflow: visible;
+  }
+
+  .branch-line {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    stroke: #a371f7;
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .branch-dot {
+    fill: #a371f7;
+    opacity: 0;
+    transition: opacity 0.2s ease 0.35s;
+  }
+
+  .project-tooltip-cards {
+    display: block;
+  }
+
+  .project-row:hover .project-tooltip,
+  .project-row:focus-visible .project-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .project-row:hover .branch-line,
+  .project-row:focus-visible .branch-line {
+    stroke-dashoffset: 0;
+  }
+
+  .project-row:hover .branch-dot,
+  .project-row:focus-visible .branch-dot {
+    opacity: 1;
+  }
+
+  .project-row:focus-visible {
+    outline: 2px solid #00bd7e;
+    outline-offset: 2px;
+  }
+
   /* Responsive Design */
   @media (max-width: 860px) {
     .main-layout {
@@ -478,6 +657,10 @@ const miniJourneys = homeContent?.data?.miniJourneys?.sort(
 
     .sliders-row {
       grid-template-columns: 1fr;
+    }
+
+    .hint-content {
+      left: 1rem;
     }
   }
 </style>

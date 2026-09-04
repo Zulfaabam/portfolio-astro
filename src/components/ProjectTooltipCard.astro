@@ -1,0 +1,76 @@
+---
+import "drawably/style.css";
+
+interface Props {
+  sourceAvailable: boolean;
+  demoAvailable: boolean;
+}
+
+const { sourceAvailable, demoAvailable } = Astro.props;
+---
+
+<div
+  class="project-tooltip-card"
+  data-drawably-project-tooltip-card
+  style="--drawably-stroke: #a371f7; --drawably-fill: #a371f7; --drawably-width: 1.5;"
+>
+  <span class="tooltip-heading">Project details</span>
+  <span class="tooltip-detail">
+    Source code: {
+      sourceAvailable ? "Repository available" : "Repository private"
+    }
+  </span>
+  <span class="tooltip-detail">
+    Live demo: {demoAvailable ? "Demo available" : "Demo coming soon"}
+  </span>
+</div>
+
+<script>
+  import { drawablyCard } from "drawably";
+
+  document
+    .querySelectorAll<HTMLElement>("[data-drawably-project-tooltip-card]")
+    .forEach((card) => drawablyCard(card, { roughness: 0.7, boil: 0.2 }));
+</script>
+
+<style>
+  .project-tooltip-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.75rem 0.9rem;
+    background: #161b22;
+    color: #e5e7eb;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-0.6rem);
+    transition:
+      clip-path 0.35s ease 0.2s,
+      transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s;
+  }
+
+  .tooltip-heading {
+    color: #a371f7;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .tooltip-detail {
+    color: #8b949e;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.69rem;
+  }
+
+  :global(.project-row:hover) .project-tooltip-card,
+  :global(.project-row:focus-visible) .project-tooltip-card {
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
+  }
+
+  @media (max-width: 860px) {
+    .project-tooltip-card {
+      padding: 0.65rem;
+    }
+  }
+</style>

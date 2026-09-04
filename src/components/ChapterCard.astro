@@ -1,0 +1,29 @@
+---
+import "drawably/style.css";
+---
+
+<div
+  class="chapter-card"
+  data-drawably-chapter-card
+  style="--drawably-stroke: rgba(0, 189, 126, 1); --drawably-fill: rgba(0, 189, 126, 1); --drawably-width: 1.5;"
+>
+  <slot />
+</div>
+
+<script>
+  import { drawablyCard } from "drawably";
+
+  document
+    .querySelectorAll<HTMLElement>("[data-drawably-chapter-card]")
+    .forEach((card) => drawablyCard(card, { roughness: 0.7, boil: 0.2 }));
+</script>
+
+<style>
+  .chapter-card {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    padding: 0;
+    background: #111317;
+  }
+</style>
