@@ -14,7 +14,7 @@ miniJourneys:
     year: "2025"
   - id: 3
     job: "Software Engineer Intern @ Formulatrix"
-    place: "Salatiga, Indonesia"
+    place: "Semarang, Indonesia"
     year: "Now"
 
 featuredProjects:

@@ -4,6 +4,7 @@ import "drawably/font.css";
 import { getEntry } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
+import ProfileCard from "./ProfileCard.astro";
 
 const homeContent = await getEntry("home", "home");
 const miniJourneys =
@@ -17,13 +18,7 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     <div class="sketch-layout">
       <aside class="sketch-sidebar">
         <div class="sidebar-stack">
-          <div class="profile-card drawably-card" data-drawably-card>
-            <span class="profile-mark">✦</span>
-            <div>
-              <h2>Zulfa Fatah<br />Akbar Ahmad</h2>
-              <p>Software Engineer</p>
-            </div>
-          </div>
+          <ProfileCard />
           <div class="actions">
             <button class="drawably-button action-primary" data-drawably-button
               >View My Work</button
@@ -50,15 +45,14 @@ const projects = homeContent?.data?.featuredProjects ?? [];
               {
                 miniJourneys.map((journey, index) => (
                   <li>
-                    <>
-                      <span class="number">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span>{journey.job}</span>
-                      <small>
-                        {journey.place} · {journey.year}
-                      </small>
-                    </>
+                    <span class="number">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span>{journey.job}</span>
+                    <small>
+                      {journey.place} · {journey.year}
+                    </small>
+                    <hr class="drawably-divider" data-drawably-divider />
                   </li>
                 ))
               }
@@ -102,6 +96,7 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     drawablyBadge,
     drawablyButton,
     drawablyCard,
+    drawablyDivider,
     drawablyList,
   } from "drawably";
 
@@ -109,8 +104,7 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     drawablyCard(el, {
       roughness: 0.8,
       boil: 0.2,
-      // fill: "#2724d1",
-      // paper: "#2724d1",
+      fill: "#2724d1",
     }),
   );
   document
@@ -128,27 +122,16 @@ const projects = homeContent?.data?.featuredProjects ?? [];
   document
     .querySelectorAll<HTMLUListElement>("[data-drawably-list]")
     .forEach((el) => drawablyList(el, { marker: "dash" }));
+  document
+    .querySelectorAll<HTMLUListElement>("[data-drawably-divider]")
+    .forEach((el) => drawablyDivider(el, { roughness: 0.8, boil: 0.2 }));
 </script>
 
 <style>
   .sketch-page {
-    --color-white: #e3e3e1;
-    --color-blue: #2724d1;
-    --color-green: #188a42;
-    --color-gray: #a1a1aa;
-    --color-black: #000000;
-    --color-red: #d12724;
-    --drawably-stroke: var(--color-black);
-    --drawably-fill: var(--color-black);
-    --drawably-error: var(--color-red);
-    --drawably-success: var(--color-green);
     min-height: 100vh;
     background: var(--color-white);
     color: var(--color-black);
-    font-family: "Drawably Pen", sans-serif;
-  }
-  :global(.sketch-page *) {
-    font-family: "Drawably Pen", sans-serif;
   }
   .sketch-layout {
     max-width: 1100px;
@@ -164,31 +147,7 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     display: grid;
     gap: 1rem;
   }
-  .profile-card {
-    aspect-ratio: 1 / 1.35;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    /* background: var(--drawably-fill); */
-    color: var(--color-black);
-    --drawably-stroke: var(--color-black);
-    --drawably-fill: var(--color-blue);
-  }
-  .profile-mark {
-    font-size: 2rem;
-  }
-  .profile-card h2 {
-    margin: 0;
-    font-size: 1.55rem;
-    line-height: 1.05;
-  }
-  .profile-card p {
-    margin: 0.75rem 0 0;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
+
   .actions {
     display: grid;
     gap: 0.65rem;
@@ -213,6 +172,8 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     display: grid;
     gap: 3.5rem;
   }
+
+  /* INTRO */
   .intro {
     display: grid;
     gap: 1rem;
@@ -231,11 +192,13 @@ const projects = homeContent?.data?.featuredProjects ?? [];
   }
   .intro p {
     margin: 0;
-    color: var(--color-gray);
+    color: var(--color-dark-gray);
     font-size: 0.95rem;
     line-height: 1.65;
     white-space: pre-line;
   }
+
+  /* CHAPTERS */
   .chapters {
     display: grid;
     gap: 2.25rem;
@@ -262,25 +225,39 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     background: var(--color-white);
   }
   .drawably-list li {
+    position: relative;
     display: grid;
     grid-template-columns: 2.5rem 1fr auto;
     gap: 0.8rem;
     align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--color-gray);
+    padding: 1rem 0 0.75rem 0;
+    /* border-bottom: 1px solid var(--color-gray); */
     color: var(--color-black);
     font-size: 0.875rem;
   }
   .drawably-list li:last-child {
     border-bottom: 0;
   }
+  .drawably-divider {
+    position: absolute;
+    bottom: -5px;
+    left: 50px;
+    right: 0;
+    margin: 0;
+    --drawably-stroke: var(--color-gray);
+  }
+
+  /* .drawably-list li:last-child .drawably-divider {
+    display: none;
+  } */
+
   .number {
     color: var(--color-blue);
     font-size: 0.75rem;
   }
   .drawably-list small,
   .project small {
-    color: var(--color-gray);
+    color: var(--color-dark-gray);
     font-size: 0.7rem;
   }
   .project-list {

@@ -25,6 +25,17 @@ import { ClientRouter } from "astro:transitions";
   *::before,
   *::after {
     box-sizing: border-box;
+    font-family: "Drawably Pen", sans-serif;
+  }
+
+  :root {
+    --color-white: #e3e3e1;
+    --color-blue: #2724d1;
+    --color-green: #188a42;
+    --color-gray: #a1a1aa;
+    --color-dark-gray: #18181b;
+    --color-black: #000000;
+    --color-red: #d12724;
   }
 
   html,
@@ -35,7 +46,8 @@ import { ClientRouter } from "astro:transitions";
     min-height: 100%;
     background-color: #090a0c;
     color: #e5e7eb;
-    font-family: var(--font-jetbrains-mono), monospace;
+    /* font-family: var(--font-jetbrains-mono), monospace; */
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -43,5 +55,18 @@ import { ClientRouter } from "astro:transitions";
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  hr {
+    display: block;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+    color: gray;
+    unicode-bidi: isolate;
+    overflow: hidden;
+    border-style: inset;
+    border-width: 1px;
   }
 </style>
