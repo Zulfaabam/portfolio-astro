@@ -33,8 +33,8 @@ const projects = homeContent?.data?.featuredProjects ?? [];
 
       <main class="content">
         <section class="intro">
-          <span class="drawably-badge" data-drawably-badge>WELCOME</span>
-          <h1>Hi, I'm Abam!</h1>
+          <span class="drawably-badge" data-drawably-badge>HELLO</span>
+          <h1>I'm Abam!</h1>
           <p>{homeContent?.data?.intro}</p>
         </section>
 
@@ -45,13 +45,9 @@ const projects = homeContent?.data?.featuredProjects ?? [];
               {
                 miniJourneys.map((journey, index) => (
                   <li>
-                    <span class="number">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
+                    <span class="number job-year">{journey.year}</span>
                     <span>{journey.job}</span>
-                    <small>
-                      {journey.place} · {journey.year}
-                    </small>
+                    <small>{journey.place}</small>
                     <hr class="drawably-divider" data-drawably-divider />
                   </li>
                 ))
@@ -118,7 +114,9 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     );
   document
     .querySelectorAll<HTMLElement>("[data-drawably-badge]")
-    .forEach((el) => drawablyBadge(el, { variant: "scribble" }));
+    .forEach((el) =>
+      drawablyBadge(el, { roughness: 0.8, boil: 0.2, variant: "outline" }),
+    );
   document
     .querySelectorAll<HTMLUListElement>("[data-drawably-list]")
     .forEach((el) => drawablyList(el, { marker: "dash" }));
@@ -181,7 +179,7 @@ const projects = homeContent?.data?.featuredProjects ?? [];
   .drawably-badge {
     width: max-content;
     padding: 0.2rem 0.55rem;
-    color: var(--color-blue);
+    color: var(--color-black);
     font-size: 0.68rem;
     letter-spacing: 0.1em;
   }
@@ -221,13 +219,12 @@ const projects = homeContent?.data?.featuredProjects ?? [];
   }
   .drawably-list {
     margin: 0;
-    padding: 0.4rem 1rem;
     background: var(--color-white);
   }
   .drawably-list li {
     position: relative;
     display: grid;
-    grid-template-columns: 2.5rem 1fr auto;
+    grid-template-columns: 5rem 1fr auto;
     gap: 0.8rem;
     align-items: center;
     padding: 1rem 0 0.75rem 0;
@@ -241,7 +238,7 @@ const projects = homeContent?.data?.featuredProjects ?? [];
   .drawably-divider {
     position: absolute;
     bottom: -5px;
-    left: 50px;
+    left: 0;
     right: 0;
     margin: 0;
     --drawably-stroke: var(--color-gray);
@@ -251,10 +248,12 @@ const projects = homeContent?.data?.featuredProjects ?? [];
     display: none;
   } */
 
-  .number {
+  .number,
+  .job-year {
     color: var(--color-blue);
     font-size: 0.75rem;
   }
+
   .drawably-list small,
   .project small {
     color: var(--color-dark-gray);
