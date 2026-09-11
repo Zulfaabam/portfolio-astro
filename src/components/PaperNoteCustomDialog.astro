@@ -1,0 +1,263 @@
+---
+interface Props {
+  id: string;
+  title?: string;
+  triggerLabel?: string;
+}
+
+const {
+  id,
+  title = "A little note",
+  triggerLabel,
+} = Astro.props;
+
+const dialogId = id;
+---
+
+{triggerLabel && (
+  <button class="custom-note-trigger" type="button" data-custom-note-open={dialogId}>
+    {triggerLabel}
+  </button>
+)}
+
+<dialog class="custom-note-dialog" id={dialogId} aria-labelledby={`${dialogId}-title`}>
+  <div class="custom-note-backdrop" data-custom-note-close></div>
+  <div class="custom-note-book" role="document">
+    <div class="custom-note-page custom-note-page-left" data-custom-note-page>
+      <svg class="custom-note-shape" viewBox="0 0 440 560" aria-hidden="true"></svg>
+    </div>
+    <div class="custom-note-page custom-note-page-right" data-custom-note-page>
+      <svg class="custom-note-shape" viewBox="0 0 440 560" aria-hidden="true"></svg>
+      <div class="custom-note-content">
+        <button class="custom-note-close" type="button" aria-label="Close note" data-custom-note-close>
+          ×
+        </button>
+        <p class="custom-note-kicker">Custom Drawably shape</p>
+        <h2 id={`${dialogId}-title`}>{title}</h2>
+        <div class="custom-note-body"><slot /></div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { roughRoundedRect, scribbleFill } from "drawably";
+  import { randomSeed } from "drawably";
+
+  document.querySelectorAll<HTMLDialogElement>(".custom-note-dialog").forEach((dialog) => {
+    if (dialog.dataset.ready) return;
+    dialog.dataset.ready = "true";
+
+    const book = dialog.querySelector<HTMLElement>(".custom-note-book");
+    const openers = document.querySelectorAll<HTMLButtonElement>(
+      `[data-custom-note-open="${dialog.id}"], [data-dialog-trigger="${dialog.id}"]`,
+    );
+    const pages = dialog.querySelectorAll<HTMLElement>("[data-custom-note-page]");
+    const closeButtons = dialog.querySelectorAll<HTMLElement>("[data-custom-note-close]");
+    let closeTimer: number | undefined;
+    let lastFocused: HTMLElement | null = null;
+
+    if (!book) return;
+
+    pages.forEach((page, pageIndex) => {
+      const svg = page.querySelector<SVGSVGElement>(".custom-note-shape");
+      if (!svg) return;
+
+      const seed = randomSeed();
+      const options = { seed, roughness: 0.85, boil: 0.2 };
+      const outline = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const shapeX = pageIndex === 0 ? 12 : -2;
+      const shapeWidth = pageIndex === 0 ? 430 : 430;
+      outline.setAttribute("d", roughRoundedRect(shapeX, 20, shapeWidth, 520, 18, options));
+      outline.setAttribute("fill", "#f6efdc");
+      outline.setAttribute("stroke", "#2724d1");
+      outline.setAttribute("stroke-width", "2");
+      outline.setAttribute("stroke-linejoin", "round");
+
+      const texture = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      texture.setAttribute("d", scribbleFill(shapeX + 12, 32, shapeWidth - 24, 496, options));
+      texture.setAttribute("fill", "none");
+      texture.setAttribute("stroke", "#2724d1");
+      texture.setAttribute("stroke-width", "0.7");
+      texture.setAttribute("stroke-opacity", "0.06");
+
+      svg.append(outline, texture);
+      page.dataset.pageIndex = String(pageIndex);
+    });
+
+    const close = () => {
+      if (!dialog.open || dialog.dataset.state === "closing") return;
+      dialog.dataset.state = "closing";
+      closeTimer = window.setTimeout(() => {
+        dialog.close();
+        delete dialog.dataset.state;
+        lastFocused?.focus();
+      }, 560);
+    };
+
+    const open = () => {
+      if (closeTimer) window.clearTimeout(closeTimer);
+      lastFocused = document.activeElement as HTMLElement;
+      dialog.dataset.state = "opening";
+      dialog.showModal();
+      requestAnimationFrame(() => (dialog.dataset.state = "open"));
+      dialog.querySelector<HTMLElement>(".custom-note-close")?.focus();
+    };
+    openers.forEach((opener) => opener.addEventListener("click", open));
+    closeButtons.forEach((button) => button.addEventListener("click", close));
+    dialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      close();
+    });
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) close();
+    });
+  });
+</script>
+
+<style>
+  .custom-note-trigger {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--color-blue);
+    background: var(--color-white);
+    color: var(--color-black);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .custom-note-dialog {
+    width: min(900px, calc(100vw - 2rem));
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .custom-note-dialog::backdrop {
+    background: rgb(9 10 12 / 72%);
+  }
+
+  .custom-note-backdrop {
+    position: fixed;
+    inset: 0;
+  }
+
+  .custom-note-book {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: min(560px, calc(100vh - 5rem));
+    perspective: 1400px;
+    filter: drop-shadow(0 22px 28px rgb(0 0 0 / 28%));
+  }
+
+  .custom-note-page {
+    position: relative;
+    min-width: 0;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: transform 560ms cubic-bezier(0.22, 0.75, 0.25, 1);
+  }
+
+  .custom-note-page-left {
+    transform-origin: right center;
+    transform: rotateY(-88deg);
+  }
+
+  .custom-note-page-right {
+    transform-origin: left center;
+    transform: rotateY(88deg);
+  }
+
+  .custom-note-dialog[data-state="open"] .custom-note-page-left,
+  .custom-note-dialog[data-state="open"] .custom-note-page-right {
+    transform: rotateY(0);
+  }
+
+  .custom-note-dialog[data-state="closing"] .custom-note-page-left {
+    transform: rotateY(-88deg);
+  }
+
+  .custom-note-dialog[data-state="closing"] .custom-note-page-right {
+    transform: rotateY(88deg);
+  }
+
+  .custom-note-shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .custom-note-content {
+    position: relative;
+    height: 100%;
+    padding: clamp(2rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition: opacity 220ms ease 260ms, transform 220ms ease 260ms;
+  }
+
+  .custom-note-dialog[data-state="open"] .custom-note-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .custom-note-close {
+    position: absolute;
+    top: clamp(1.5rem, 4vw, 2.5rem);
+    right: clamp(1.5rem, 4vw, 2.5rem);
+    border: 0;
+    background: transparent;
+    color: var(--color-black);
+    font: inherit;
+    font-size: 1.75rem;
+    cursor: pointer;
+  }
+
+  .custom-note-kicker {
+    margin: 0 0 0.75rem;
+    color: var(--color-green);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .custom-note-content h2 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+  }
+
+  .custom-note-body {
+    max-height: min(300px, 45vh);
+    overflow: auto;
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 640px) {
+    .custom-note-dialog {
+      width: calc(100vw - 1rem);
+    }
+
+    .custom-note-book {
+      min-height: min(500px, calc(100vh - 3rem));
+    }
+
+    .custom-note-content {
+      padding: 3rem 1rem 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .custom-note-page,
+    .custom-note-content {
+      transition-duration: 1ms;
+      transition-delay: 0ms;
+    }
+  }
+</style>

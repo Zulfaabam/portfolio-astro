@@ -1,0 +1,275 @@
+---
+interface Props {
+  title?: string;
+  triggerLabel?: string;
+}
+
+const { title = "A little note", triggerLabel = "Open note" } = Astro.props;
+
+const dialogId = `paper-note-${crypto.randomUUID()}`;
+---
+
+<button
+  class="drawably-button paper-note-trigger"
+  type="button"
+  data-note-open={dialogId}
+>
+  {triggerLabel}
+</button>
+
+<dialog
+  class="paper-note-dialog"
+  id={dialogId}
+  aria-labelledby={`${dialogId}-title`}
+>
+  <div class="paper-note-backdrop" data-note-close></div>
+  <div class="paper-note-shell" role="document">
+    <div
+      class="paper-note-page paper-note-page-left"
+      data-paper-note-page
+      aria-hidden="true"
+    >
+      <span class="paper-note-margin"></span>
+    </div>
+    <div class="paper-note-page paper-note-page-right" data-paper-note-page>
+      <div class="paper-note-content">
+        <button
+          class="paper-note-close"
+          type="button"
+          aria-label="Close note"
+          data-note-close
+        >
+          ×
+        </button>
+        <p class="paper-note-kicker">A quick note</p>
+        <h2 id={`${dialogId}-title`}>{title}</h2>
+        <div class="paper-note-body">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { drawablyCard } from "drawably";
+
+  document
+    .querySelectorAll<HTMLDialogElement>(".paper-note-dialog")
+    .forEach((dialog) => {
+      if (dialog.dataset.ready) return;
+      dialog.dataset.ready = "true";
+
+      const shell = dialog.querySelector<HTMLElement>(".paper-note-shell");
+      const opener = document.querySelector<HTMLButtonElement>(
+        `[data-note-open="${dialog.id}"]`,
+      );
+      const closeButtons =
+        dialog.querySelectorAll<HTMLElement>("[data-note-close]");
+      let lastFocused: HTMLElement | null = null;
+      let closeTimer: number | undefined;
+
+      if (!shell || !opener) return;
+
+      shell
+        .querySelectorAll<HTMLElement>("[data-paper-note-page]")
+        .forEach((page) => {
+          drawablyCard(page, {
+            roughness: 0.8,
+            boil: 0.2,
+            stroke: "#2724d1",
+            fill: "#f6efdc",
+            paper: "#f6efdc",
+          });
+        });
+
+      const open = () => {
+        if (closeTimer) window.clearTimeout(closeTimer);
+        lastFocused = document.activeElement as HTMLElement;
+        dialog.dataset.state = "opening";
+        dialog.showModal();
+        requestAnimationFrame(() => {
+          dialog.dataset.state = "open";
+        });
+        dialog.querySelector<HTMLElement>(".paper-note-close")?.focus();
+      };
+
+      const close = () => {
+        if (!dialog.open || dialog.dataset.state === "closing") return;
+        dialog.dataset.state = "closing";
+        closeTimer = window.setTimeout(() => {
+          dialog.close();
+          delete dialog.dataset.state;
+          lastFocused?.focus();
+        }, 560);
+      };
+
+      opener.addEventListener("click", open);
+      closeButtons.forEach((button) => button.addEventListener("click", close));
+      dialog.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        close();
+      });
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) close();
+      });
+    });
+</script>
+
+<style>
+  .paper-note-trigger {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    color: var(--color-black);
+    font: inherit;
+    cursor: pointer;
+    --drawably-stroke: var(--color-blue);
+    --drawably-fill: var(--color-green);
+  }
+
+  .paper-note-dialog {
+    width: min(900px, calc(100vw - 2rem));
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-black);
+    overflow: visible;
+  }
+
+  .paper-note-dialog::backdrop {
+    background: rgb(9 10 12 / 72%);
+  }
+
+  .paper-note-backdrop {
+    position: fixed;
+    inset: 0;
+  }
+
+  .paper-note-shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: min(560px, calc(100vh - 5rem));
+    transform-style: preserve-3d;
+    perspective: 1400px;
+    filter: drop-shadow(0 22px 28px rgb(0 0 0 / 28%));
+    --drawably-stroke: #2724d1;
+    --drawably-fill: #f6efdc;
+  }
+
+  .paper-note-page {
+    position: relative;
+    min-width: 0;
+    background: var(--drawably-paper, var(--drawably-fill));
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    transition: transform 560ms cubic-bezier(0.22, 0.75, 0.25, 1);
+    --drawably-stroke: #2724d1;
+    --drawably-fill: #f6efdc;
+    --drawably-paper: #f6efdc;
+  }
+
+  .paper-note-page-left {
+    transform-origin: right center;
+    transform: rotateY(-88deg);
+    border-right: 1px solid rgb(0 0 0 / 12%);
+  }
+
+  .paper-note-page-right {
+    transform-origin: left center;
+    transform: rotateY(88deg);
+    border-left: 1px solid rgb(0 0 0 / 12%);
+  }
+
+  .paper-note-dialog[data-state="open"] .paper-note-page-left,
+  .paper-note-dialog[data-state="open"] .paper-note-page-right {
+    transform: rotateY(0);
+  }
+
+  .paper-note-dialog[data-state="closing"] .paper-note-page-left {
+    transform: rotateY(-88deg);
+  }
+
+  .paper-note-dialog[data-state="closing"] .paper-note-page-right {
+    transform: rotateY(88deg);
+  }
+
+  .paper-note-margin {
+    position: absolute;
+    inset: 0 1.8rem;
+    border-left: 2px solid rgb(209 39 36 / 20%);
+  }
+
+  .paper-note-content {
+    position: relative;
+    height: 100%;
+    padding: clamp(2rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition:
+      opacity 220ms ease 260ms,
+      transform 220ms ease 260ms;
+  }
+
+  .paper-note-dialog[data-state="open"] .paper-note-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .paper-note-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-black);
+    font: inherit;
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .paper-note-kicker {
+    margin: 0 0 0.75rem;
+    color: var(--color-green);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .paper-note-content h2 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+  }
+
+  .paper-note-body {
+    max-height: min(300px, 45vh);
+    overflow: auto;
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 640px) {
+    .paper-note-dialog {
+      width: calc(100vw - 1rem);
+    }
+
+    .paper-note-shell {
+      min-height: min(500px, calc(100vh - 3rem));
+    }
+
+    .paper-note-content {
+      padding: 3rem 1rem 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .paper-note-page,
+    .paper-note-content {
+      transition-duration: 1ms;
+      transition-delay: 0ms;
+    }
+  }
+</style>

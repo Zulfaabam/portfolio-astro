@@ -5,6 +5,7 @@ import { getEntry } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import ProfileCard from "./ProfileCard.astro";
+import PaperNoteCustomDialog from "./PaperNoteCustomDialog.astro";
 
 const homeContent = await getEntry("home", "home");
 const miniJourneys =
@@ -20,8 +21,10 @@ const projects = homeContent?.data?.featuredProjects ?? [];
         <div class="sidebar-stack">
           <ProfileCard />
           <div class="actions">
-            <button class="drawably-button action-primary" data-drawably-button
-              >View My Work</button
+            <button
+              class="drawably-button action-primary"
+              data-drawably-button
+              data-dialog-trigger="selected-work-note">View My Work</button
             >
             <button
               class="drawably-button action-secondary"
@@ -85,6 +88,9 @@ const projects = homeContent?.data?.featuredProjects ?? [];
       </main>
     </div>
   </div>
+  <PaperNoteCustomDialog id="selected-work-note" title="Selected work">
+    Here are a few things I have built, shaped, and shipped along the way.
+  </PaperNoteCustomDialog>
 </Layout>
 
 <script>
