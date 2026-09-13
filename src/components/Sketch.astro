@@ -88,9 +88,27 @@ const projects = homeContent?.data?.featuredProjects ?? [];
       </main>
     </div>
   </div>
-  <PaperNoteCustomDialog id="selected-work-note" title="Selected work">
-    Here are a few things I have built, shaped, and shipped along the way.
-  </PaperNoteCustomDialog>
+  <PaperNoteCustomDialog
+    id="selected-work-note"
+    title="Selected work"
+    pages={[
+      {
+        kicker: "Selected work",
+        title: "Things I have shipped",
+        body: "Here are a few things I have built, shaped, and shipped along the way.",
+      },
+      {
+        kicker: "How I work",
+        title: "Make it useful first",
+        body: "I like turning fuzzy product ideas into clear interfaces, then refining the details until the experience feels natural to use.",
+      },
+      {
+        kicker: "Keep exploring",
+        title: "More notes to come",
+        body: "This little stack is a place for projects, experiments, and the lessons that connect them. There is always another page worth making.",
+      },
+    ]}
+  />
 </Layout>
 
 <script>

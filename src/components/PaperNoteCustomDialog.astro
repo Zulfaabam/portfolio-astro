@@ -3,116 +3,337 @@ interface Props {
   id: string;
   title?: string;
   triggerLabel?: string;
+  pages?: Array<{
+    kicker?: string;
+    title: string;
+    body: string;
+  }>;
 }
 
 const {
   id,
   title = "A little note",
   triggerLabel,
+  pages = [{ title, body: "" }],
 } = Astro.props;
 
 const dialogId = id;
 ---
 
-{triggerLabel && (
-  <button class="custom-note-trigger" type="button" data-custom-note-open={dialogId}>
-    {triggerLabel}
-  </button>
-)}
+{
+  triggerLabel && (
+    <button
+      class="custom-note-trigger"
+      type="button"
+      data-custom-note-open={dialogId}
+    >
+      {triggerLabel}
+    </button>
+  )
+}
 
-<dialog class="custom-note-dialog" id={dialogId} aria-labelledby={`${dialogId}-title`}>
+<dialog
+  class="custom-note-dialog"
+  id={dialogId}
+  aria-labelledby={`${dialogId}-title`}
+>
   <div class="custom-note-backdrop" data-custom-note-close></div>
-  <div class="custom-note-book" role="document">
-    <div class="custom-note-page custom-note-page-left" data-custom-note-page>
-      <svg class="custom-note-shape" viewBox="0 0 440 560" aria-hidden="true"></svg>
-    </div>
-    <div class="custom-note-page custom-note-page-right" data-custom-note-page>
-      <svg class="custom-note-shape" viewBox="0 0 440 560" aria-hidden="true"></svg>
-      <div class="custom-note-content">
-        <button class="custom-note-close" type="button" aria-label="Close note" data-custom-note-close>
-          ×
-        </button>
-        <p class="custom-note-kicker">Custom Drawably shape</p>
-        <h2 id={`${dialogId}-title`}>{title}</h2>
-        <div class="custom-note-body"><slot /></div>
-      </div>
-    </div>
+  <div class="custom-note-stack" role="document" aria-live="polite">
+    {
+      pages.map((page, pageIndex) => (
+        <article
+          class:list={[
+            "custom-note-page",
+            pageIndex === 0 && "custom-note-page-front",
+          ]}
+          data-custom-note-page
+          data-page-index={pageIndex}
+          aria-hidden={pageIndex === 0 ? undefined : "true"}
+        >
+          <svg
+            class="custom-note-shape"
+            viewBox="0 0 440 560"
+            aria-hidden="true"
+          />
+          <div class="custom-note-content">
+            <button
+              class="custom-note-close"
+              type="button"
+              aria-label="Close note"
+              data-custom-note-close
+            >
+              ×
+            </button>
+            <p class="custom-note-kicker">{page.kicker ?? "A little note"}</p>
+            <h2 id={pageIndex === 0 ? `${dialogId}-title` : undefined}>
+              {page.title}
+            </h2>
+            <div class="custom-note-body">{page.body || <slot />}</div>
+            <p class="custom-note-status" data-custom-note-status>
+              Note {pageIndex + 1} of {pages.length}
+            </p>
+          </div>
+          {pages.length > 1 && (
+            <>
+              <button
+                class="custom-note-nav custom-note-nav-previous"
+                type="button"
+                aria-label="Previous note"
+                title="Previous note"
+                data-custom-note-previous
+              >
+                <svg
+                  class="custom-note-nav-icon"
+                  viewBox="0 0 32 24"
+                  aria-hidden="true"
+                />
+              </button>
+              <button
+                class="custom-note-nav custom-note-nav-next"
+                type="button"
+                aria-label="Next note"
+                title="Next note"
+                data-custom-note-next
+              >
+                <svg
+                  class="custom-note-nav-icon"
+                  viewBox="0 0 32 24"
+                  aria-hidden="true"
+                />
+              </button>
+            </>
+          )}
+        </article>
+      ))
+    }
   </div>
 </dialog>
 
 <script>
-  import { roughRoundedRect, scribbleFill } from "drawably";
+  import { roughArrow, roughRoundedRect, scribbleFill } from "drawably";
+  import { drawablyButton } from "drawably";
   import { randomSeed } from "drawably";
 
-  document.querySelectorAll<HTMLDialogElement>(".custom-note-dialog").forEach((dialog) => {
-    if (dialog.dataset.ready) return;
-    dialog.dataset.ready = "true";
+  document
+    .querySelectorAll<HTMLDialogElement>(".custom-note-dialog")
+    .forEach((dialog) => {
+      if (dialog.dataset.ready) return;
+      dialog.dataset.ready = "true";
 
-    const book = dialog.querySelector<HTMLElement>(".custom-note-book");
-    const openers = document.querySelectorAll<HTMLButtonElement>(
-      `[data-custom-note-open="${dialog.id}"], [data-dialog-trigger="${dialog.id}"]`,
-    );
-    const pages = dialog.querySelectorAll<HTMLElement>("[data-custom-note-page]");
-    const closeButtons = dialog.querySelectorAll<HTMLElement>("[data-custom-note-close]");
-    let closeTimer: number | undefined;
-    let lastFocused: HTMLElement | null = null;
+      const stack = dialog.querySelector<HTMLElement>(".custom-note-stack");
+      const openers = document.querySelectorAll<HTMLButtonElement>(
+        `[data-custom-note-open="${dialog.id}"], [data-dialog-trigger="${dialog.id}"]`,
+      );
+      const pages = Array.from(
+        dialog.querySelectorAll<HTMLElement>("[data-custom-note-page]"),
+      );
+      const closeButtons = dialog.querySelectorAll<HTMLElement>(
+        "[data-custom-note-close]",
+      );
+      const previousButtons = dialog.querySelectorAll<HTMLButtonElement>(
+        "[data-custom-note-previous]",
+      );
+      const nextButtons = dialog.querySelectorAll<HTMLButtonElement>(
+        "[data-custom-note-next]",
+      );
+      const statuses = dialog.querySelectorAll<HTMLElement>(
+        "[data-custom-note-status]",
+      );
+      let closeTimer: number | undefined;
+      let lastFocused: HTMLElement | null = null;
+      let isAdvancing = false;
+      let pageIndex = 0;
+      let swipeStartX: number | null = null;
+      let swipeStartY: number | null = null;
 
-    if (!book) return;
+      if (!stack) return;
 
-    pages.forEach((page, pageIndex) => {
-      const svg = page.querySelector<SVGSVGElement>(".custom-note-shape");
-      if (!svg) return;
+      const attachNavigationIcon = (
+        button: HTMLButtonElement,
+        direction: "previous" | "next",
+      ) => {
+        const svg = button.querySelector<SVGSVGElement>(
+          ".custom-note-nav-icon",
+        );
+        if (!svg) return;
 
-      const seed = randomSeed();
-      const options = { seed, roughness: 0.85, boil: 0.2 };
-      const outline = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      const shapeX = pageIndex === 0 ? 12 : -2;
-      const shapeWidth = pageIndex === 0 ? 430 : 430;
-      outline.setAttribute("d", roughRoundedRect(shapeX, 20, shapeWidth, 520, 18, options));
-      outline.setAttribute("fill", "#f6efdc");
-      outline.setAttribute("stroke", "#2724d1");
-      outline.setAttribute("stroke-width", "2");
-      outline.setAttribute("stroke-linejoin", "round");
+        const seed = randomSeed();
+        const path = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path",
+        );
+        const startX = direction === "previous" ? 25 : 7;
+        const endX = direction === "previous" ? 7 : 25;
+        path.setAttribute(
+          "d",
+          roughArrow(startX, 12, endX, 12, {
+            seed,
+            roughness: 0.85,
+            boil: 0.2,
+          }),
+        );
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "currentColor");
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-linejoin", "round");
+        svg.append(path);
+      };
 
-      const texture = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      texture.setAttribute("d", scribbleFill(shapeX + 12, 32, shapeWidth - 24, 496, options));
-      texture.setAttribute("fill", "none");
-      texture.setAttribute("stroke", "#2724d1");
-      texture.setAttribute("stroke-width", "0.7");
-      texture.setAttribute("stroke-opacity", "0.06");
+      previousButtons.forEach((button) =>
+        attachNavigationIcon(button, "previous"),
+      );
+      nextButtons.forEach((button) => attachNavigationIcon(button, "next"));
+      [...previousButtons, ...nextButtons].forEach((button) => {
+        drawablyButton(button, {
+          variant: "solid",
+          roughness: 0.85,
+          boil: 0.2,
+        });
+      });
 
-      svg.append(outline, texture);
-      page.dataset.pageIndex = String(pageIndex);
+      pages.forEach((page, index) => {
+        const svg = page.querySelector<SVGSVGElement>(".custom-note-shape");
+        if (!svg) return;
+
+        const seed = randomSeed();
+        const options = { seed, roughness: 0.85, boil: 0.2 };
+        const outline = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path",
+        );
+        const shapeX = 5;
+        const shapeWidth = 430;
+        outline.setAttribute(
+          "d",
+          roughRoundedRect(shapeX, 20, shapeWidth, 520, 18, options),
+        );
+        outline.setAttribute("fill", "#f6efdc");
+        outline.setAttribute("stroke", "#2724d1");
+        outline.setAttribute("stroke-width", "2");
+        outline.setAttribute("stroke-linejoin", "round");
+
+        const texture = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path",
+        );
+        texture.setAttribute(
+          "d",
+          scribbleFill(shapeX + 12, 32, shapeWidth - 24, 496, options),
+        );
+        texture.setAttribute("fill", "none");
+        texture.setAttribute("stroke", "#2724d1");
+        texture.setAttribute("stroke-width", "0.7");
+        texture.setAttribute("stroke-opacity", "0.06");
+
+        svg.append(outline, texture);
+        page.dataset.pageIndex = String(index);
+      });
+
+      const updateStack = () => {
+        pages.forEach((page, index) => {
+          const depth = (index - pageIndex + pages.length) % pages.length;
+          page.dataset.depth = String(depth);
+          page.setAttribute("aria-hidden", depth === 0 ? "false" : "true");
+          page.tabIndex = depth === 0 ? 0 : -1;
+          page.inert = depth !== 0;
+        });
+        statuses.forEach((status) => {
+          status.textContent = `Note ${pageIndex + 1} of ${pages.length}`;
+        });
+        nextButtons.forEach((button) => {
+          button.disabled = pages.length < 2 || isAdvancing;
+        });
+      };
+
+      const changePage = (direction: -1 | 1) => {
+        if (isAdvancing || pages.length < 2) return;
+        isAdvancing = true;
+        stack.dataset.state = "advancing";
+        updateStack();
+        window.setTimeout(() => {
+          pageIndex = (pageIndex + direction + pages.length) % pages.length;
+          stack.dataset.state = "settling";
+          updateStack();
+          window.requestAnimationFrame(() => {
+            stack.dataset.state = "open";
+            isAdvancing = false;
+            updateStack();
+            dialog
+              .querySelector<HTMLElement>(
+                `[data-depth="0"] [data-custom-note-${direction === 1 ? "next" : "previous"}]`,
+              )
+              ?.focus();
+          });
+        }, 560);
+      };
+
+      const close = () => {
+        if (!dialog.open || dialog.dataset.state === "closing") return;
+        dialog.dataset.state = "closing";
+        closeTimer = window.setTimeout(() => {
+          dialog.close();
+          document.body.classList.remove("custom-note-scroll-locked");
+          delete dialog.dataset.state;
+          lastFocused?.focus();
+        }, 760);
+      };
+
+      const open = () => {
+        if (closeTimer) window.clearTimeout(closeTimer);
+        pageIndex = 0;
+        isAdvancing = false;
+        updateStack();
+        lastFocused = document.activeElement as HTMLElement;
+        dialog.dataset.state = "opening";
+        document.body.classList.add("custom-note-scroll-locked");
+        dialog.showModal();
+        requestAnimationFrame(() => (dialog.dataset.state = "open"));
+        dialog.querySelector<HTMLElement>(".custom-note-close")?.focus();
+      };
+      openers.forEach((opener) => opener.addEventListener("click", open));
+      closeButtons.forEach((button) => button.addEventListener("click", close));
+      previousButtons.forEach((button) =>
+        button.addEventListener("click", () => changePage(-1)),
+      );
+      nextButtons.forEach((button) =>
+        button.addEventListener("click", () => changePage(1)),
+      );
+      stack.addEventListener(
+        "touchstart",
+        (event) => {
+          if (!dialog.open || isAdvancing || event.touches.length !== 1) return;
+          swipeStartX = event.touches[0].clientX;
+          swipeStartY = event.touches[0].clientY;
+        },
+        { passive: true },
+      );
+      const handleTouchEnd = (event: TouchEvent) => {
+        if (swipeStartX === null || swipeStartY === null) return;
+
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - swipeStartX;
+        const deltaY = touch.clientY - swipeStartY;
+        swipeStartX = null;
+        swipeStartY = null;
+
+        if (deltaX > -50 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
+        event.preventDefault();
+        changePage(1);
+      };
+      document.addEventListener("touchend", handleTouchEnd, { passive: false });
+      stack.addEventListener("touchcancel", () => {
+        swipeStartX = null;
+        swipeStartY = null;
+      });
+      dialog.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        close();
+      });
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) close();
+      });
     });
-
-    const close = () => {
-      if (!dialog.open || dialog.dataset.state === "closing") return;
-      dialog.dataset.state = "closing";
-      closeTimer = window.setTimeout(() => {
-        dialog.close();
-        delete dialog.dataset.state;
-        lastFocused?.focus();
-      }, 560);
-    };
-
-    const open = () => {
-      if (closeTimer) window.clearTimeout(closeTimer);
-      lastFocused = document.activeElement as HTMLElement;
-      dialog.dataset.state = "opening";
-      dialog.showModal();
-      requestAnimationFrame(() => (dialog.dataset.state = "open"));
-      dialog.querySelector<HTMLElement>(".custom-note-close")?.focus();
-    };
-    openers.forEach((opener) => opener.addEventListener("click", open));
-    closeButtons.forEach((button) => button.addEventListener("click", close));
-    dialog.addEventListener("cancel", (event) => {
-      event.preventDefault();
-      close();
-    });
-    dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) close();
-    });
-  });
 </script>
 
 <style>
@@ -126,8 +347,13 @@ const dialogId = id;
     cursor: pointer;
   }
 
+  :global(body.custom-note-scroll-locked) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   .custom-note-dialog {
-    width: min(900px, calc(100vw - 2rem));
+    width: min(520px, calc(100vw - 2rem));
     max-width: none;
     padding: 0;
     border: 0;
@@ -144,45 +370,100 @@ const dialogId = id;
     inset: 0;
   }
 
-  .custom-note-book {
+  .custom-note-stack {
     position: relative;
     z-index: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: min(560px, calc(100vh - 5rem));
+    min-height: min(660px, calc(100vh - 4rem));
     perspective: 1400px;
     filter: drop-shadow(0 22px 28px rgb(0 0 0 / 28%));
+    touch-action: pan-y;
   }
 
   .custom-note-page {
-    position: relative;
-    min-width: 0;
+    position: absolute;
+    inset: 0;
+    min-height: min(660px, calc(100vh - 4rem));
+    transform: translate3d(0, 0, 0) rotate(0deg);
     transform-style: preserve-3d;
     backface-visibility: hidden;
-    transition: transform 560ms cubic-bezier(0.22, 0.75, 0.25, 1);
+    transition:
+      transform 560ms cubic-bezier(0.22, 0.75, 0.25, 1),
+      opacity 220ms ease;
   }
 
-  .custom-note-page-left {
-    transform-origin: right center;
-    transform: rotateY(-88deg);
+  .custom-note-page[data-depth="0"] {
+    z-index: 4;
+    opacity: 1;
   }
 
-  .custom-note-page-right {
-    transform-origin: left center;
-    transform: rotateY(88deg);
+  .custom-note-page[data-depth="1"] {
+    z-index: 3;
+    transform: translate3d(0.65rem, 0.55rem, -20px) rotate(1.2deg);
+    opacity: 0.94;
   }
 
-  .custom-note-dialog[data-state="open"] .custom-note-page-left,
-  .custom-note-dialog[data-state="open"] .custom-note-page-right {
-    transform: rotateY(0);
+  .custom-note-page[data-depth="2"] {
+    z-index: 2;
+    transform: translate3d(1.15rem, 1rem, -40px) rotate(-1.3deg);
+    opacity: 0.88;
   }
 
-  .custom-note-dialog[data-state="closing"] .custom-note-page-left {
-    transform: rotateY(-88deg);
+  .custom-note-page[data-depth="3"] {
+    z-index: 1;
+    transform: translate3d(1.6rem, 1.35rem, -60px) rotate(1.8deg);
+    opacity: 0.8;
   }
 
-  .custom-note-dialog[data-state="closing"] .custom-note-page-right {
-    transform: rotateY(88deg);
+  .custom-note-dialog[data-state="opening"] .custom-note-page {
+    transform: translate3d(0, 115vh, 120px) rotate(11deg);
+    opacity: 0;
+  }
+
+  .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth="1"] {
+    transition-delay: 60ms;
+  }
+
+  .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth="2"] {
+    transition-delay: 120ms;
+  }
+
+  .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth="3"] {
+    transition-delay: 180ms;
+  }
+
+  .custom-note-stack[data-state="advancing"] .custom-note-page[data-depth="0"] {
+    transform: translate3d(3.5rem, 13rem, 80px) rotate(14deg);
+    opacity: 0;
+  }
+
+  .custom-note-stack[data-state="settling"] .custom-note-page[data-depth="0"] {
+    transition-duration: 1ms;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  .custom-note-dialog[data-state="closing"] .custom-note-page {
+    transform: translate3d(0, 115vh, 120px) rotate(11deg);
+    opacity: 0;
+    transition:
+      transform 560ms cubic-bezier(0.42, 0, 1, 1),
+      opacity 420ms ease;
+  }
+
+  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="0"] {
+    z-index: 5;
+  }
+
+  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="1"] {
+    transition-delay: 60ms;
+  }
+
+  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="2"] {
+    transition-delay: 120ms;
+  }
+
+  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="3"] {
+    transition-delay: 180ms;
   }
 
   .custom-note-shape {
@@ -195,16 +476,53 @@ const dialogId = id;
 
   .custom-note-content {
     position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
     height: 100%;
-    padding: clamp(2rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(4rem, 8vw, 5.5rem);
+    overflow: hidden;
     opacity: 0;
     transform: translateY(0.75rem);
-    transition: opacity 220ms ease 260ms, transform 220ms ease 260ms;
   }
 
-  .custom-note-dialog[data-state="open"] .custom-note-content {
+  .custom-note-page[data-page-index="0"] .custom-note-content {
+    transition:
+      opacity 220ms ease 260ms,
+      transform 220ms ease 260ms;
+  }
+
+  .custom-note-dialog[data-state="open"]
+    .custom-note-page[data-page-index="0"]
+    .custom-note-content,
+  .custom-note-page[data-depth="0"]:not([data-page-index="0"])
+    .custom-note-content {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  .custom-note-page:not([data-depth="0"]) .custom-note-content {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .custom-note-page:not([data-depth="0"]) .custom-note-nav {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .custom-note-page[data-depth="0"] .custom-note-content {
+    transition: none;
+  }
+
+  .custom-note-dialog[data-state="opening"]
+    .custom-note-page[data-page-index="0"]
+    .custom-note-content {
+    transition:
+      opacity 220ms ease 260ms,
+      transform 220ms ease 260ms;
   }
 
   .custom-note-close {
@@ -219,6 +537,47 @@ const dialogId = id;
     cursor: pointer;
   }
 
+  .custom-note-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    place-items: center;
+    color: var(--color-black);
+    font: inherit;
+    cursor: pointer;
+    --drawably-stroke: var(--color-blue);
+    --drawably-fill: var(--color-paper);
+  }
+
+  .custom-note-nav-previous {
+    left: 1.25rem;
+  }
+
+  .custom-note-nav-next {
+    right: 1.25rem;
+  }
+
+  .custom-note-nav-icon {
+    width: 1.5rem;
+    height: 1.125rem;
+    overflow: visible;
+  }
+
+  .custom-note-nav:disabled {
+    cursor: wait;
+    opacity: 0.5;
+  }
+
+  .custom-note-status {
+    margin: 0.8rem 0 0;
+    color: var(--color-dark-gray);
+    font-size: 0.75rem;
+  }
+
   .custom-note-kicker {
     margin: 0 0 0.75rem;
     color: var(--color-green);
@@ -228,28 +587,40 @@ const dialogId = id;
   }
 
   .custom-note-content h2 {
+    min-width: 0;
     margin: 0 0 1.5rem;
     font-size: clamp(1.5rem, 4vw, 2.4rem);
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .custom-note-body {
-    max-height: min(300px, 45vh);
+    min-height: 0;
+    flex: 1;
+    min-width: 0;
     overflow: auto;
+    overflow-wrap: anywhere;
+    word-break: break-word;
     font-size: 0.95rem;
     line-height: 1.8;
   }
 
   @media (max-width: 640px) {
-    .custom-note-dialog {
-      width: calc(100vw - 1rem);
-    }
-
-    .custom-note-book {
-      min-height: min(500px, calc(100vh - 3rem));
+    .custom-note-stack,
+    .custom-note-page {
+      min-height: min(560px, calc(100vh - 3rem));
     }
 
     .custom-note-content {
-      padding: 3rem 1rem 1.5rem;
+      padding: 3rem 3.5rem 1.5rem;
+    }
+
+    .custom-note-nav-previous {
+      left: 0.75rem;
+    }
+
+    .custom-note-nav-next {
+      right: 0.75rem;
     }
   }
 
@@ -257,6 +628,24 @@ const dialogId = id;
     .custom-note-page,
     .custom-note-content {
       transition-duration: 1ms;
+      transition-delay: 0ms;
+    }
+
+    .custom-note-stack[data-state="advancing"]
+      .custom-note-page[data-depth="0"] {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+      opacity: 0;
+    }
+
+    .custom-note-dialog[data-state="closing"] .custom-note-page {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+      opacity: 0;
+      transition-delay: 0ms;
+    }
+
+    .custom-note-dialog[data-state="opening"] .custom-note-page {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+      opacity: 1;
       transition-delay: 0ms;
     }
   }
