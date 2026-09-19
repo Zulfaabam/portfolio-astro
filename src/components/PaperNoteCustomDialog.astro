@@ -69,40 +69,42 @@ const dialogId = id;
               {page.title}
             </h2>
             <div class="custom-note-body">{page.body || <slot />}</div>
-            <p class="custom-note-status" data-custom-note-status>
-              Note {pageIndex + 1} of {pages.length}
-            </p>
+            <div class="custom-note-footer">
+              <p class="custom-note-status" data-custom-note-status>
+                Note {pageIndex + 1} of {pages.length}
+              </p>
+              {pages.length > 1 && (
+                <div>
+                  <button
+                    class="custom-note-nav custom-note-nav-previous"
+                    type="button"
+                    aria-label="Previous note"
+                    title="Previous note"
+                    data-custom-note-previous
+                  >
+                    <svg
+                      class="custom-note-nav-icon"
+                      viewBox="0 0 32 24"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    class="custom-note-nav custom-note-nav-next"
+                    type="button"
+                    aria-label="Next note"
+                    title="Next note"
+                    data-custom-note-next
+                  >
+                    <svg
+                      class="custom-note-nav-icon"
+                      viewBox="0 0 32 24"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-          {pages.length > 1 && (
-            <>
-              <button
-                class="custom-note-nav custom-note-nav-previous"
-                type="button"
-                aria-label="Previous note"
-                title="Previous note"
-                data-custom-note-previous
-              >
-                <svg
-                  class="custom-note-nav-icon"
-                  viewBox="0 0 32 24"
-                  aria-hidden="true"
-                />
-              </button>
-              <button
-                class="custom-note-nav custom-note-nav-next"
-                type="button"
-                aria-label="Next note"
-                title="Next note"
-                data-custom-note-next
-              >
-                <svg
-                  class="custom-note-nav-icon"
-                  viewBox="0 0 32 24"
-                  aria-hidden="true"
-                />
-              </button>
-            </>
-          )}
         </article>
       ))
     }
@@ -141,7 +143,6 @@ const dialogId = id;
       );
       let closeTimer: number | undefined;
       let lastFocused: HTMLElement | null = null;
-      let isAdvancing = false;
       let pageIndex = 0;
       let swipeStartX: number | null = null;
       let swipeStartY: number | null = null;
@@ -242,30 +243,22 @@ const dialogId = id;
           status.textContent = `Note ${pageIndex + 1} of ${pages.length}`;
         });
         nextButtons.forEach((button) => {
-          button.disabled = pages.length < 2 || isAdvancing;
+          button.disabled = pages.length < 2;
         });
       };
 
       const changePage = (direction: -1 | 1) => {
-        if (isAdvancing || pages.length < 2) return;
-        isAdvancing = true;
-        stack.dataset.state = "advancing";
+        if (pages.length < 2) return;
+
+        pageIndex = (pageIndex + direction + pages.length) % pages.length;
         updateStack();
-        window.setTimeout(() => {
-          pageIndex = (pageIndex + direction + pages.length) % pages.length;
-          stack.dataset.state = "settling";
-          updateStack();
-          window.requestAnimationFrame(() => {
-            stack.dataset.state = "open";
-            isAdvancing = false;
-            updateStack();
-            dialog
-              .querySelector<HTMLElement>(
-                `[data-depth="0"] [data-custom-note-${direction === 1 ? "next" : "previous"}]`,
-              )
-              ?.focus();
-          });
-        }, 560);
+        window.requestAnimationFrame(() => {
+          dialog
+            .querySelector<HTMLElement>(
+              `[data-depth="0"] [data-custom-note-${direction === 1 ? "next" : "previous"}]`,
+            )
+            ?.focus();
+        });
       };
 
       const close = () => {
@@ -282,7 +275,6 @@ const dialogId = id;
       const open = () => {
         if (closeTimer) window.clearTimeout(closeTimer);
         pageIndex = 0;
-        isAdvancing = false;
         updateStack();
         lastFocused = document.activeElement as HTMLElement;
         dialog.dataset.state = "opening";
@@ -302,7 +294,7 @@ const dialogId = id;
       stack.addEventListener(
         "touchstart",
         (event) => {
-          if (!dialog.open || isAdvancing || event.touches.length !== 1) return;
+          if (!dialog.open || event.touches.length !== 1) return;
           swipeStartX = event.touches[0].clientX;
           swipeStartY = event.touches[0].clientY;
         },
@@ -345,6 +337,18 @@ const dialogId = id;
     color: var(--color-black);
     font: inherit;
     cursor: pointer;
+  }
+
+  .custom-note-trigger,
+  .custom-note-close,
+  .custom-note-nav {
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .custom-note-trigger:active,
+  .custom-note-close:active,
+  .custom-note-nav:active:not(:disabled) {
+    transform: scale(0.97);
   }
 
   :global(body.custom-note-scroll-locked) {
@@ -429,17 +433,6 @@ const dialogId = id;
 
   .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth="3"] {
     transition-delay: 180ms;
-  }
-
-  .custom-note-stack[data-state="advancing"] .custom-note-page[data-depth="0"] {
-    transform: translate3d(3.5rem, 13rem, 80px) rotate(14deg);
-    opacity: 0;
-  }
-
-  .custom-note-stack[data-state="settling"] .custom-note-page[data-depth="0"] {
-    transition-duration: 1ms;
-    transform: translate3d(0, 0, 0) rotate(0deg);
-    opacity: 1;
   }
 
   .custom-note-dialog[data-state="closing"] .custom-note-page {
@@ -538,8 +531,6 @@ const dialogId = id;
   }
 
   .custom-note-nav {
-    position: absolute;
-    top: 50%;
     z-index: 5;
     display: grid;
     width: 2.2rem;
@@ -553,12 +544,17 @@ const dialogId = id;
     --drawably-fill: var(--color-paper);
   }
 
-  .custom-note-nav-previous {
-    left: 1.25rem;
+  .custom-note-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
-  .custom-note-nav-next {
-    right: 1.25rem;
+  .custom-note-footer > div {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
   }
 
   .custom-note-nav-icon {
@@ -615,37 +611,53 @@ const dialogId = id;
       padding: 3rem 3.5rem 1.5rem;
     }
 
-    .custom-note-nav-previous {
-      left: 0.75rem;
-    }
-
-    .custom-note-nav-next {
-      right: 0.75rem;
+    .custom-note-footer {
+      gap: 0.75rem;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .custom-note-page,
+    .custom-note-page[data-depth],
+    .custom-note-dialog[data-state="opening"] .custom-note-page,
+    .custom-note-dialog[data-state="closing"] .custom-note-page {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+
+    .custom-note-page {
+      transition: opacity 200ms ease;
+    }
+
     .custom-note-content {
-      transition-duration: 1ms;
+      transform: none;
+      transition: opacity 200ms ease;
+    }
+
+    .custom-note-page[data-depth="0"] .custom-note-content {
+      transition: opacity 200ms ease;
+    }
+
+    .custom-note-page[data-page-index="0"] .custom-note-content,
+    .custom-note-dialog[data-state="opening"]
+      .custom-note-page[data-page-index="0"]
+      .custom-note-content {
+      transform: none;
+      transition: opacity 200ms ease;
       transition-delay: 0ms;
     }
 
-    .custom-note-stack[data-state="advancing"]
-      .custom-note-page[data-depth="0"] {
-      transform: translate3d(0, 0, 0) rotate(0deg);
-      opacity: 0;
-    }
-
     .custom-note-dialog[data-state="closing"] .custom-note-page {
-      transform: translate3d(0, 0, 0) rotate(0deg);
       opacity: 0;
       transition-delay: 0ms;
     }
 
     .custom-note-dialog[data-state="opening"] .custom-note-page {
-      transform: translate3d(0, 0, 0) rotate(0deg);
-      opacity: 1;
+      opacity: 0;
+      transition-delay: 0ms;
+    }
+
+    .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth],
+    .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth] {
+      transition: opacity 200ms ease;
       transition-delay: 0ms;
     }
   }

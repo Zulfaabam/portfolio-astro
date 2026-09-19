@@ -19,26 +19,54 @@ import backsideImage from "../assets/abam-in-fmlx.jpg";
 
     <!-- Back of card -->
     <div class="flip-card-back">
-      <Image src={backsideImage} alt="Abam in FMLX" priority loading="eager" />
+      <Image src={backsideImage} alt="Abam in FMLX" />
     </div>
   </div>
+  <button
+    class="flip-card-toggle"
+    type="button"
+    aria-pressed="false"
+    aria-label="Show profile photo"
+    data-profile-card-toggle></button>
 </div>
 
 <script>
   import { drawablyCard } from "drawably";
 
-  document.querySelectorAll<HTMLElement>("[data-drawably-card]").forEach((el) =>
-    drawablyCard(el, {
-      roughness: 0.8,
-      boil: 0.2,
-      fill: "#2724d1",
-    }),
-  );
+  document
+    .querySelectorAll<HTMLElement>("[data-drawably-card]")
+    .forEach((container) => {
+      drawablyCard(container, {
+        roughness: 0.8,
+        boil: 0.2,
+        fill: "#2724d1",
+      });
+
+      const toggle = container.querySelector<HTMLButtonElement>(
+        "[data-profile-card-toggle]",
+      );
+
+      toggle?.addEventListener("click", () => {
+        const isFlipped = container.dataset.flipped === "true";
+        container.dataset.flipped = String(!isFlipped);
+        container.dataset.manualState = "true";
+        toggle.setAttribute("aria-pressed", String(!isFlipped));
+        toggle.setAttribute(
+          "aria-label",
+          !isFlipped ? "Show profile details" : "Show profile photo",
+        );
+      });
+
+      container.addEventListener("pointerleave", () => {
+        delete container.dataset.manualState;
+      });
+    });
 </script>
 
 <style>
   /* Flip Container */
   .flip-container {
+    position: relative;
     width: 100%;
     aspect-ratio: 1 / 1.35;
     perspective: 1000px;
@@ -53,12 +81,39 @@ import backsideImage from "../assets/abam-in-fmlx.jpg";
     position: relative;
     width: 100%;
     height: 100%;
-    transition: transform 0.6s;
+    transition: transform 250ms cubic-bezier(0.77, 0, 0.175, 1);
     transform-style: preserve-3d;
   }
 
-  .flip-container:hover .flip-card {
+  .flip-container[data-flipped="true"] .flip-card {
     transform: rotateY(180deg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .flip-container:hover:not([data-manual-state="true"]) .flip-card {
+      transform: rotateY(180deg);
+    }
+  }
+
+  .flip-card-toggle {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+  }
+
+  .flip-card-toggle:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flip-card {
+      transition: none;
+    }
   }
 
   .flip-card-front {
@@ -100,10 +155,6 @@ import backsideImage from "../assets/abam-in-fmlx.jpg";
     -webkit-backface-visibility: hidden;
   }
 
-  .flip-card-back {
-    transform: rotateY(180deg);
-  }
-
   /* Back of card - Image */
   .flip-card-back {
     border-radius: 8px;
@@ -111,6 +162,7 @@ import backsideImage from "../assets/abam-in-fmlx.jpg";
     box-shadow:
       0 16px 36px -10px rgba(0, 189, 126, 0.25),
       0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    transform: rotateY(180deg);
   }
 
   .flip-card-back img {
