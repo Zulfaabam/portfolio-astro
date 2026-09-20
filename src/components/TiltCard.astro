@@ -1,0 +1,194 @@
+---
+// Bencho Tilt card, MIT: https://bencho.dev/licence
+// Original explanatory comments are preserved in tilt-card-source-notes.ts.
+// The slot replaces BUTTERFLY with this project's optimized portrait.
+interface Props {
+  fill?: boolean;
+}
+const { fill = false } = Astro.props;
+---
+
+<bencho-tilt-card class:list={["tlt", { "tlt-fill": fill }]}>
+  <div class="tlt-card">
+    <slot />
+    <span class="tlt-sheen" aria-hidden="true"></span>
+  </div>
+</bencho-tilt-card>
+
+<script>
+  const clamp = (v: number, lo: number, hi: number) =>
+    Math.min(hi, Math.max(lo, v));
+  const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+  class TiltCard extends HTMLElement {
+    private cleanup?: () => void;
+
+    connectedCallback() {
+      this.cleanup?.();
+      const card = this.querySelector<HTMLElement>(".tlt-card");
+      const sheen = this.querySelector<HTMLElement>(".tlt-sheen");
+      if (!card || !sheen) return;
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+      const hover = matchMedia("(hover: hover) and (pointer: fine)");
+      const events = new AbortController();
+      const { signal } = events;
+      // Work in 0..100 so the source's 0.02 snap threshold stays precise.
+      const at = [0, 0, 0];
+      const target = [0, 0, 0];
+      const velocity = [0, 0, 0];
+      // Bencho springOf(50): stiffness 0.16, decay 0.72.
+      const k = 0.16;
+      const d = 0.72;
+      let raf = 0;
+      let previous = 0;
+
+      const render = () => {
+        // One sprung position drives the rotation, gradients and shadow.
+        const sx = at[0] / 100;
+        const sy = at[1] / 100;
+        const lit = clamp(at[2] / 100, 0, 1);
+        const px = ((sx + 1) / 2) * 100;
+        const py = ((sy + 1) / 2) * 100;
+        const dark = 0.6 * 0.55 * lit;
+        const rim = 0.6 * 0.34 * lit;
+        // It sinks, it does not lift. TranslateZ first retreats in room axes.
+        card.style.transform = `translateZ(${-14 * lit}px) rotateX(${-sy * 10}deg) rotateY(${sx * 10}deg)`;
+        // A pressed surface has less air beneath it: the shadow tightens.
+        card.style.boxShadow = `0 ${mix(20, 9, lit)}px ${mix(44, 24, lit)}px -8px rgba(15, 23, 42, ${mix(0.22, 0.15, lit)})`;
+        sheen.style.backgroundImage = `radial-gradient(42% 34% at ${px}% ${py}%, rgba(9, 14, 28, ${dark}) 0%, rgba(9, 14, 28, 0) 100%), radial-gradient(52% 42% at ${100 - px}% ${100 - py}%, rgba(255, 255, 255, ${rim}) 0%, rgba(255, 255, 255, 0) 100%)`;
+      };
+      const tick = (time: number) => {
+        // Frames, not milliseconds. Raise damping to dt for dropped frames.
+        const dt = previous ? clamp((time - previous) / 16.67, 0, 2.5) : 1;
+        previous = time;
+        let settled = true;
+        at.forEach((value, index) => {
+          velocity[index] += (target[index] - value) * k * dt;
+          velocity[index] *= Math.pow(d, dt);
+          at[index] += velocity[index] * dt;
+          if (
+            Math.abs(target[index] - at[index]) < 0.02 &&
+            Math.abs(velocity[index]) < 0.02
+          ) {
+            at[index] = target[index];
+            velocity[index] = 0;
+          } else settled = false;
+        });
+        render();
+        // Park the loop once settled; interruptions retain current velocity.
+        raf = settled ? 0 : requestAnimationFrame(tick);
+        if (settled) previous = 0;
+      };
+      const wake = () => {
+        if (!raf) raf = requestAnimationFrame(tick);
+      };
+      const reset = () => {
+        target.fill(0);
+        wake();
+      };
+      const stop = () => {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        previous = 0;
+        at.fill(0);
+        target.fill(0);
+        velocity.fill(0);
+        render();
+      };
+      const track = (event: PointerEvent) => {
+        if (
+          reduced.matches ||
+          (event.pointerType === "mouse" && !hover.matches)
+        )
+          return;
+        // Measure the stationary frame, never the rotating image.
+        const rect = this.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        target[0] =
+          clamp(((event.clientX - rect.left) / rect.width) * 2 - 1, -1, 1) *
+          100;
+        target[1] =
+          clamp(((event.clientY - rect.top) / rect.height) * 2 - 1, -1, 1) *
+          100;
+        target[2] = 100;
+        wake();
+      };
+      this.addEventListener("pointerdown", track, { signal });
+      this.addEventListener("pointermove", track, { signal });
+      this.addEventListener(
+        "pointerout",
+        (event) => {
+          // Null also means outside: the pointer may have left the window.
+          if (
+            !(event.relatedTarget instanceof Node) ||
+            !this.contains(event.relatedTarget)
+          )
+            reset();
+        },
+        { signal },
+      );
+      this.addEventListener(
+        "pointerup",
+        (event) => {
+          if (event.pointerType !== "mouse") reset();
+        },
+        { signal },
+      );
+      // A touch taken over by scrolling never reports leaving.
+      this.addEventListener("pointercancel", reset, { signal });
+      window.addEventListener("blur", stop, { signal });
+      reduced.addEventListener("change", stop, { signal });
+      hover.addEventListener("change", stop, { signal });
+      render();
+      this.cleanup = () => {
+        events.abort();
+        cancelAnimationFrame(raf);
+      };
+    }
+    disconnectedCallback() {
+      this.cleanup?.();
+    }
+  }
+  if (!customElements.get("bencho-tilt-card"))
+    customElements.define("bencho-tilt-card", TiltCard);
+</script>
+
+<style>
+  .tlt {
+    display: block;
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 260 / 320;
+    /* Perspective belongs on the stationary frame so the vanishing
+       point stays in the room. 800px keeps foreshortening gentle. */
+    perspective: 800px;
+  }
+  .tlt-card {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background-color: var(--color-blue);
+    overflow: hidden;
+    /* No permanent will-change: promote only when the image moves. */
+  }
+  .tlt-sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .tlt-fill {
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+  /* Slotted images belong to the caller's Astro scope. Constrain them
+     here so their intrinsic dimensions cannot expand the card or grid. */
+  .tlt-card > :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

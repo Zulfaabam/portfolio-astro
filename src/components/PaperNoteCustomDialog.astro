@@ -116,216 +116,224 @@ const dialogId = id;
   import { drawablyButton } from "drawably";
   import { randomSeed } from "drawably";
 
-  document
-    .querySelectorAll<HTMLDialogElement>(".custom-note-dialog")
-    .forEach((dialog) => {
-      if (dialog.dataset.ready) return;
-      dialog.dataset.ready = "true";
+  const initializeNotes = () => {
+    document
+      .querySelectorAll<HTMLDialogElement>(".custom-note-dialog")
+      .forEach((dialog) => {
+        if (dialog.dataset.ready) return;
+        dialog.dataset.ready = "true";
 
-      const stack = dialog.querySelector<HTMLElement>(".custom-note-stack");
-      const openers = document.querySelectorAll<HTMLButtonElement>(
-        `[data-custom-note-open="${dialog.id}"], [data-dialog-trigger="${dialog.id}"]`,
-      );
-      const pages = Array.from(
-        dialog.querySelectorAll<HTMLElement>("[data-custom-note-page]"),
-      );
-      const closeButtons = dialog.querySelectorAll<HTMLElement>(
-        "[data-custom-note-close]",
-      );
-      const previousButtons = dialog.querySelectorAll<HTMLButtonElement>(
-        "[data-custom-note-previous]",
-      );
-      const nextButtons = dialog.querySelectorAll<HTMLButtonElement>(
-        "[data-custom-note-next]",
-      );
-      const statuses = dialog.querySelectorAll<HTMLElement>(
-        "[data-custom-note-status]",
-      );
-      let closeTimer: number | undefined;
-      let lastFocused: HTMLElement | null = null;
-      let pageIndex = 0;
-      let swipeStartX: number | null = null;
-      let swipeStartY: number | null = null;
-
-      if (!stack) return;
-
-      const attachNavigationIcon = (
-        button: HTMLButtonElement,
-        direction: "previous" | "next",
-      ) => {
-        const svg = button.querySelector<SVGSVGElement>(
-          ".custom-note-nav-icon",
+        const stack = dialog.querySelector<HTMLElement>(".custom-note-stack");
+        const openers = document.querySelectorAll<HTMLButtonElement>(
+          `[data-custom-note-open="${dialog.id}"], [data-dialog-trigger="${dialog.id}"]`,
         );
-        if (!svg) return;
-
-        const seed = randomSeed();
-        const path = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "path",
+        const pages = Array.from(
+          dialog.querySelectorAll<HTMLElement>("[data-custom-note-page]"),
         );
-        const startX = direction === "previous" ? 25 : 7;
-        const endX = direction === "previous" ? 7 : 25;
-        path.setAttribute(
-          "d",
-          roughArrow(startX, 12, endX, 12, {
-            seed,
+        const closeButtons = dialog.querySelectorAll<HTMLElement>(
+          "[data-custom-note-close]",
+        );
+        const previousButtons = dialog.querySelectorAll<HTMLButtonElement>(
+          "[data-custom-note-previous]",
+        );
+        const nextButtons = dialog.querySelectorAll<HTMLButtonElement>(
+          "[data-custom-note-next]",
+        );
+        const statuses = dialog.querySelectorAll<HTMLElement>(
+          "[data-custom-note-status]",
+        );
+        let closeTimer: number | undefined;
+        let lastFocused: HTMLElement | null = null;
+        let pageIndex = 0;
+        let swipeStartX: number | null = null;
+        let swipeStartY: number | null = null;
+
+        if (!stack) return;
+
+        const attachNavigationIcon = (
+          button: HTMLButtonElement,
+          direction: "previous" | "next",
+        ) => {
+          const svg = button.querySelector<SVGSVGElement>(
+            ".custom-note-nav-icon",
+          );
+          if (!svg) return;
+
+          const seed = randomSeed();
+          const path = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          );
+          const startX = direction === "previous" ? 25 : 7;
+          const endX = direction === "previous" ? 7 : 25;
+          path.setAttribute(
+            "d",
+            roughArrow(startX, 12, endX, 12, {
+              seed,
+              roughness: 0.85,
+              boil: 0.2,
+            }),
+          );
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "currentColor");
+          path.setAttribute("stroke-width", "2");
+          path.setAttribute("stroke-linecap", "round");
+          path.setAttribute("stroke-linejoin", "round");
+          svg.append(path);
+        };
+
+        previousButtons.forEach((button) =>
+          attachNavigationIcon(button, "previous"),
+        );
+        nextButtons.forEach((button) => attachNavigationIcon(button, "next"));
+        [...previousButtons, ...nextButtons].forEach((button) => {
+          drawablyButton(button, {
+            variant: "solid",
             roughness: 0.85,
             boil: 0.2,
-          }),
-        );
-        path.setAttribute("fill", "none");
-        path.setAttribute("stroke", "currentColor");
-        path.setAttribute("stroke-width", "2");
-        path.setAttribute("stroke-linecap", "round");
-        path.setAttribute("stroke-linejoin", "round");
-        svg.append(path);
-      };
-
-      previousButtons.forEach((button) =>
-        attachNavigationIcon(button, "previous"),
-      );
-      nextButtons.forEach((button) => attachNavigationIcon(button, "next"));
-      [...previousButtons, ...nextButtons].forEach((button) => {
-        drawablyButton(button, {
-          variant: "solid",
-          roughness: 0.85,
-          boil: 0.2,
+          });
         });
-      });
 
-      pages.forEach((page, index) => {
-        const svg = page.querySelector<SVGSVGElement>(".custom-note-shape");
-        if (!svg) return;
-
-        const seed = randomSeed();
-        const options = { seed, roughness: 0.85, boil: 0.2 };
-        const outline = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "path",
-        );
-        const shapeX = 5;
-        const shapeWidth = 430;
-        outline.setAttribute(
-          "d",
-          roughRoundedRect(shapeX, 20, shapeWidth, 520, 18, options),
-        );
-        outline.setAttribute("fill", "#f6efdc");
-        outline.setAttribute("stroke", "#2724d1");
-        outline.setAttribute("stroke-width", "2");
-        outline.setAttribute("stroke-linejoin", "round");
-
-        const texture = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "path",
-        );
-        texture.setAttribute(
-          "d",
-          scribbleFill(shapeX + 12, 32, shapeWidth - 24, 496, options),
-        );
-        texture.setAttribute("fill", "none");
-        texture.setAttribute("stroke", "#2724d1");
-        texture.setAttribute("stroke-width", "0.7");
-        texture.setAttribute("stroke-opacity", "0.06");
-
-        svg.append(outline, texture);
-        page.dataset.pageIndex = String(index);
-      });
-
-      const updateStack = () => {
         pages.forEach((page, index) => {
-          const depth = (index - pageIndex + pages.length) % pages.length;
-          page.dataset.depth = String(depth);
-          page.setAttribute("aria-hidden", depth === 0 ? "false" : "true");
-          page.tabIndex = depth === 0 ? 0 : -1;
-          page.inert = depth !== 0;
+          const svg = page.querySelector<SVGSVGElement>(".custom-note-shape");
+          if (!svg) return;
+
+          const seed = randomSeed();
+          const options = { seed, roughness: 0.85, boil: 0.2 };
+          const outline = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          );
+          const shapeX = 5;
+          const shapeWidth = 430;
+          outline.setAttribute(
+            "d",
+            roughRoundedRect(shapeX, 20, shapeWidth, 520, 18, options),
+          );
+          outline.setAttribute("fill", "#f6efdc");
+          outline.setAttribute("stroke", "#2724d1");
+          outline.setAttribute("stroke-width", "2");
+          outline.setAttribute("stroke-linejoin", "round");
+
+          const texture = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          );
+          texture.setAttribute(
+            "d",
+            scribbleFill(shapeX + 12, 32, shapeWidth - 24, 496, options),
+          );
+          texture.setAttribute("fill", "none");
+          texture.setAttribute("stroke", "#2724d1");
+          texture.setAttribute("stroke-width", "0.7");
+          texture.setAttribute("stroke-opacity", "0.06");
+
+          svg.append(outline, texture);
+          page.dataset.pageIndex = String(index);
         });
-        statuses.forEach((status) => {
-          status.textContent = `Note ${pageIndex + 1} of ${pages.length}`;
+
+        const updateStack = () => {
+          pages.forEach((page, index) => {
+            const depth = (index - pageIndex + pages.length) % pages.length;
+            page.dataset.depth = String(depth);
+            page.setAttribute("aria-hidden", depth === 0 ? "false" : "true");
+            page.tabIndex = depth === 0 ? 0 : -1;
+            page.inert = depth !== 0;
+          });
+          statuses.forEach((status) => {
+            status.textContent = `Note ${pageIndex + 1} of ${pages.length}`;
+          });
+          nextButtons.forEach((button) => {
+            button.disabled = pages.length < 2;
+          });
+        };
+
+        const changePage = (direction: -1 | 1) => {
+          if (pages.length < 2) return;
+
+          pageIndex = (pageIndex + direction + pages.length) % pages.length;
+          updateStack();
+          window.requestAnimationFrame(() => {
+            dialog
+              .querySelector<HTMLElement>(
+                `[data-depth="0"] [data-custom-note-${direction === 1 ? "next" : "previous"}]`,
+              )
+              ?.focus();
+          });
+        };
+
+        const close = () => {
+          if (!dialog.open || dialog.dataset.state === "closing") return;
+          dialog.dataset.state = "closing";
+          closeTimer = window.setTimeout(() => {
+            dialog.close();
+            document.body.classList.remove("custom-note-scroll-locked");
+            delete dialog.dataset.state;
+            lastFocused?.focus();
+          }, 760);
+        };
+
+        const open = () => {
+          if (closeTimer) window.clearTimeout(closeTimer);
+          pageIndex = 0;
+          updateStack();
+          lastFocused = document.activeElement as HTMLElement;
+          dialog.dataset.state = "opening";
+          document.body.classList.add("custom-note-scroll-locked");
+          dialog.showModal();
+          requestAnimationFrame(() => (dialog.dataset.state = "open"));
+          dialog.querySelector<HTMLElement>(".custom-note-close")?.focus();
+        };
+        openers.forEach((opener) => opener.addEventListener("click", open));
+        closeButtons.forEach((button) =>
+          button.addEventListener("click", close),
+        );
+        previousButtons.forEach((button) =>
+          button.addEventListener("click", () => changePage(-1)),
+        );
+        nextButtons.forEach((button) =>
+          button.addEventListener("click", () => changePage(1)),
+        );
+        stack.addEventListener(
+          "touchstart",
+          (event) => {
+            if (!dialog.open || event.touches.length !== 1) return;
+            swipeStartX = event.touches[0].clientX;
+            swipeStartY = event.touches[0].clientY;
+          },
+          { passive: true },
+        );
+        const handleTouchEnd = (event: TouchEvent) => {
+          if (swipeStartX === null || swipeStartY === null) return;
+
+          const touch = event.changedTouches[0];
+          const deltaX = touch.clientX - swipeStartX;
+          const deltaY = touch.clientY - swipeStartY;
+          swipeStartX = null;
+          swipeStartY = null;
+
+          if (deltaX > -50 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2)
+            return;
+          event.preventDefault();
+          changePage(1);
+        };
+        stack.addEventListener("touchend", handleTouchEnd, { passive: false });
+        stack.addEventListener("touchcancel", () => {
+          swipeStartX = null;
+          swipeStartY = null;
         });
-        nextButtons.forEach((button) => {
-          button.disabled = pages.length < 2;
+        dialog.addEventListener("cancel", (event) => {
+          event.preventDefault();
+          close();
         });
-      };
-
-      const changePage = (direction: -1 | 1) => {
-        if (pages.length < 2) return;
-
-        pageIndex = (pageIndex + direction + pages.length) % pages.length;
-        updateStack();
-        window.requestAnimationFrame(() => {
-          dialog
-            .querySelector<HTMLElement>(
-              `[data-depth="0"] [data-custom-note-${direction === 1 ? "next" : "previous"}]`,
-            )
-            ?.focus();
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog) close();
         });
-      };
-
-      const close = () => {
-        if (!dialog.open || dialog.dataset.state === "closing") return;
-        dialog.dataset.state = "closing";
-        closeTimer = window.setTimeout(() => {
-          dialog.close();
-          document.body.classList.remove("custom-note-scroll-locked");
-          delete dialog.dataset.state;
-          lastFocused?.focus();
-        }, 760);
-      };
-
-      const open = () => {
-        if (closeTimer) window.clearTimeout(closeTimer);
-        pageIndex = 0;
-        updateStack();
-        lastFocused = document.activeElement as HTMLElement;
-        dialog.dataset.state = "opening";
-        document.body.classList.add("custom-note-scroll-locked");
-        dialog.showModal();
-        requestAnimationFrame(() => (dialog.dataset.state = "open"));
-        dialog.querySelector<HTMLElement>(".custom-note-close")?.focus();
-      };
-      openers.forEach((opener) => opener.addEventListener("click", open));
-      closeButtons.forEach((button) => button.addEventListener("click", close));
-      previousButtons.forEach((button) =>
-        button.addEventListener("click", () => changePage(-1)),
-      );
-      nextButtons.forEach((button) =>
-        button.addEventListener("click", () => changePage(1)),
-      );
-      stack.addEventListener(
-        "touchstart",
-        (event) => {
-          if (!dialog.open || event.touches.length !== 1) return;
-          swipeStartX = event.touches[0].clientX;
-          swipeStartY = event.touches[0].clientY;
-        },
-        { passive: true },
-      );
-      const handleTouchEnd = (event: TouchEvent) => {
-        if (swipeStartX === null || swipeStartY === null) return;
-
-        const touch = event.changedTouches[0];
-        const deltaX = touch.clientX - swipeStartX;
-        const deltaY = touch.clientY - swipeStartY;
-        swipeStartX = null;
-        swipeStartY = null;
-
-        if (deltaX > -50 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
-        event.preventDefault();
-        changePage(1);
-      };
-      document.addEventListener("touchend", handleTouchEnd, { passive: false });
-      stack.addEventListener("touchcancel", () => {
-        swipeStartX = null;
-        swipeStartY = null;
       });
-      dialog.addEventListener("cancel", (event) => {
-        event.preventDefault();
-        close();
-      });
-      dialog.addEventListener("click", (event) => {
-        if (event.target === dialog) close();
-      });
-    });
+  };
+
+  initializeNotes();
+  document.addEventListener("astro:page-load", initializeNotes);
 </script>
 
 <style>

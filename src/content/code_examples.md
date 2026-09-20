@@ -1,4 +1,6 @@
-Tooltip 1
+# Examples
+
+## Tooltip 1
 
 ```html
 <!-- Tooltip 1 -->
@@ -131,7 +133,7 @@ Tooltip 1
 }
 ```
 
-Tooltip 2
+## Tooltip 2
 
 ```html
 <!-- Tooltip 2 -->
@@ -357,4 +359,60 @@ Tooltip 2
 .tooltip-container:hover .branch-dot {
   opacity: 1;
 }
+```
+
+## Tilt Card
+
+```css
+/* IT SINKS, IT DOES NOT LIFT. Every tilt card on the
+   internet rotates TOWARD the cursor: the corner nearest you
+   rises to meet you and the card reads as a slab of glass
+   catching the light. This one does the opposite — the point
+   you are over goes AWAY and the far side comes up.
+
+   One minus sign, and it is the whole component. A surface
+   that rises to your finger is being displayed to you; a
+   surface that gives under it is being touched. */
+const rx = -ny * tilt;   /* cursor at the top → top goes back */
+const ry =  nx * tilt;   /* cursor right → right goes back  */
+
+/* THE ROTATION ALONE IS NOT ENOUGH. A rotation about the
+   centre is symmetric — near side down, far side up by the
+   same amount — and on its own it reads as a card pivoting,
+   not as one being pressed. What makes it a press is that the
+   darkest point tracks the pointer: a depression catches
+   shadow at its deepest, and the rim opposite catches light.
+   These two gradients do at least as much work as the
+   transform, and neither convinces on its own. */
+background-image:
+  radial-gradient(42% 34% at X% Y%, rgba(9,14,28,0.25), transparent),
+  radial-gradient(52% 42% at (100-X)% (100-Y)%, rgba(255,255,255,0.15), transparent);
+
+/* THE SHADOW TIGHTENS. A thing pressed into a surface has
+   less air under it, so the gap closes and the shadow draws
+   in. Growing it on hover is the reflex — it is what a card
+   that LIFTS would do — and it fights every other cue here. */
+box-shadow: 0 mix(20, 9, lit)px mix(44, 24, lit)px -8px rgba(15,23,42,0.2);
+
+/* ONE PAIR OF NUMBERS IS THE STATE. Two springs hold where
+   the pointer is, normalised to -1..1, and the rotation, both
+   gradients and the shadow are all read off them — three
+   readings of one number rather than three things animating
+   towards the same place. The spring is on the POSITION, not
+   on the rotation, so they cannot disagree about where the
+   finger is.
+
+   Sprung rather than tracked one-to-one because a card with
+   no weight follows the cursor exactly and reads as a texture
+   pinned to the mouse. The lag is what gives it mass. */
+const sx = useSpring(on ? nx : 0);
+const sy = useSpring(on ? ny : 0);
+
+/* PERSPECTIVE ON THE FRAME, not on the card. On the card
+   itself it is applied per element, so the vanishing point
+   rides along with the rotation instead of staying put in the
+   room — and the frame is also what the pointer is measured
+   against, because asking a rotating object where it is gets
+   you an answer that has already turned away. */
+perspective: 800px;
 ```

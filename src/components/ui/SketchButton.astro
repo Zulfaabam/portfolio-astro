@@ -1,0 +1,63 @@
+---
+import "drawably/style.css";
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"button"> {
+  variant?: "solid" | "outline";
+  fullWidth?: boolean;
+}
+
+const {
+  variant = "solid",
+  fullWidth = false,
+  type = "button",
+  class: className,
+  ...attributes
+} = Astro.props;
+---
+
+<button
+  {...attributes}
+  type={type}
+  class:list={[
+    "drawably-button",
+    `sketch-button-${variant}`,
+    { "full-width": fullWidth },
+    className,
+  ]}
+  data-sketch-button={variant}><slot /></button
+>
+
+<script>
+  import { drawablyButton } from "drawably";
+  import { initializeSketches } from "./initializeSketches";
+
+  initializeSketches<HTMLButtonElement>("[data-sketch-button]", (el) =>
+    drawablyButton(el, {
+      roughness: 0.8,
+      boil: 0.2,
+      variant: el.dataset.sketchButton === "outline" ? "outline" : "solid",
+    }),
+  );
+</script>
+
+<style>
+  .drawably-button {
+    padding: 0.7rem 1rem;
+    font: inherit;
+    cursor: pointer;
+  }
+  .full-width {
+    width: 100%;
+  }
+  .sketch-button-solid {
+    color: var(--color-white);
+    --drawably-stroke: var(--color-black);
+    --drawably-fill: var(--color-green);
+  }
+  .sketch-button-outline {
+    color: var(--color-black);
+    --drawably-stroke: var(--color-blue);
+    --drawably-fill: var(--color-white);
+  }
+</style>

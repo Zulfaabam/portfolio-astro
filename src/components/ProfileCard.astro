@@ -1,173 +1,68 @@
 ---
 import { Image } from "astro:assets";
-import backsideImage from "../assets/abam-in-fmlx.jpg";
+import profileImage from "../assets/abam-in-fmlx.jpg";
+import TiltCard from "./TiltCard.astro";
 ---
 
-<!-- Preload the backside image -->
-<link rel="preload" as="image" href={backsideImage.src} />
-
-<div class="flip-container drawably-card" data-drawably-card>
-  <div class="flip-card">
-    <!-- Front of card -->
-    <div class="flip-card-front">
-      <span class="profile-mark">✦</span>
+<div class="profile-card drawably-card" data-drawably-card>
+  <TiltCard fill>
+    <Image
+      src={profileImage}
+      alt="Zulfa Fatah Akbar Ahmad"
+      class="profile-image"
+    />
+    <div class="profile-caption">
+      <span class="profile-mark" aria-hidden="true">✦</span>
       <div>
         <h2>Zulfa Fatah<br />Akbar Ahmad</h2>
         <p>Software Engineer</p>
       </div>
     </div>
-
-    <!-- Back of card -->
-    <div class="flip-card-back">
-      <Image src={backsideImage} alt="Abam in FMLX" />
-    </div>
-  </div>
-  <button
-    class="flip-card-toggle"
-    type="button"
-    aria-pressed="false"
-    aria-label="Show profile photo"
-    data-profile-card-toggle></button>
+  </TiltCard>
 </div>
 
-<script>
-  import { drawablyCard } from "drawably";
-
-  document
-    .querySelectorAll<HTMLElement>("[data-drawably-card]")
-    .forEach((container) => {
-      drawablyCard(container, {
-        roughness: 0.8,
-        boil: 0.2,
-        fill: "#2724d1",
-      });
-
-      const toggle = container.querySelector<HTMLButtonElement>(
-        "[data-profile-card-toggle]",
-      );
-
-      toggle?.addEventListener("click", () => {
-        const isFlipped = container.dataset.flipped === "true";
-        container.dataset.flipped = String(!isFlipped);
-        container.dataset.manualState = "true";
-        toggle.setAttribute("aria-pressed", String(!isFlipped));
-        toggle.setAttribute(
-          "aria-label",
-          !isFlipped ? "Show profile details" : "Show profile photo",
-        );
-      });
-
-      container.addEventListener("pointerleave", () => {
-        delete container.dataset.manualState;
-      });
-    });
-</script>
-
 <style>
-  /* Flip Container */
-  .flip-container {
+  .profile-card {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    min-width: 0;
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1.35;
-    perspective: 1000px;
-
     padding: 1rem;
     color: var(--color-white);
     --drawably-stroke: var(--color-black);
     --drawably-fill: var(--color-blue);
   }
-
-  .flip-card {
-    position: relative;
+  .profile-image {
+    display: block;
     width: 100%;
     height: 100%;
-    transition: transform 250ms cubic-bezier(0.77, 0, 0.175, 1);
-    transform-style: preserve-3d;
+    object-fit: cover;
   }
-
-  .flip-container[data-flipped="true"] .flip-card {
-    transform: rotateY(180deg);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .flip-container:hover:not([data-manual-state="true"]) .flip-card {
-      transform: rotateY(180deg);
-    }
-  }
-
-  .flip-card-toggle {
+  .profile-caption {
     position: absolute;
     inset: 0;
-    z-index: 1;
-    padding: 0;
-    cursor: pointer;
-    background: transparent;
-    border: 0;
-  }
-
-  .flip-card-toggle:focus-visible {
-    outline: 2px solid var(--color-white);
-    outline-offset: 3px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .flip-card {
-      transition: none;
-    }
-  }
-
-  .flip-card-front {
-    border-radius: 8px;
-    min-height: 100%;
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: rgba(0, 0, 0, 0.3) url("/src/assets/abam.jpg") center / cover
-      no-repeat;
-    background-blend-mode: overlay;
+    background: rgb(0 0 0 / 30%);
+    pointer-events: none;
   }
-
   .profile-mark {
     font-size: 2rem;
     line-height: 1;
   }
-  .flip-card-front h2 {
+  .profile-caption h2 {
     margin: 0;
     font-size: 1.55rem;
     line-height: 1.05;
   }
-  .flip-card-front p {
+  .profile-caption p {
     margin: 0.75rem 0 0;
     font-size: 0.68rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-
-  .flip-card-front,
-  .flip-card-back {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-
-  /* Back of card - Image */
-  .flip-card-back {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow:
-      0 16px 36px -10px rgba(0, 189, 126, 0.25),
-      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-    transform: rotateY(180deg);
-  }
-
-  .flip-card-back img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 </style>

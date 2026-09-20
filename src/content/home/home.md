@@ -20,17 +20,23 @@ miniJourneys:
 featuredProjects:
   - id: 1
     title: "PokePinpoint"
+    description: "PokePinpoint is a fun and challenging Pokémon guessing game where players use generated clues to identify a mystery Pokémon."
     repository: ""
     demo: "https://pokepinpoint.netlify.app/"
     thumbnail: ""
+    status: "On Progress"
   - id: 2
     title: "Lelang Elektronik JBA"
+    description: "An auction platform by JBA Indonesia."
     repository: ""
     demo: "https://lelang.jba.co.id/"
     thumbnail: ""
+    status: "Done"
   - id: 3
     title: "VISION"
+    description: "A content management system for JBA Indonesia to manage auction data, customers, and analytics."
     repository: ""
     demo: ""
     thumbnail: ""
+    status: "Done"
 ---

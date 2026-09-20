@@ -1,6 +1,7 @@
 import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
 import { glob, file } from "astro/loaders";
+import { parse } from "csv-parse/sync";
 
 const home = defineCollection({
   loader: glob({ base: "./src/content/home", pattern: "home.md" }),
@@ -20,6 +21,8 @@ const home = defineCollection({
       z.object({
         id: z.number(),
         title: z.string(),
+        description: z.string().optional(),
+        status: z.string(),
         repository: z.string(),
         demo: z.string(),
         thumbnail: z.string(),
@@ -29,22 +32,24 @@ const home = defineCollection({
 });
 
 const projects = defineCollection({
-  // loader: glob({ base: "./src/content/projects", pattern: "**/*.{md,mdx}" }),
+  loader: file("src/content/projects.csv", {
+    parser: (text) =>
+      parse(text, { columns: true, skip_empty_lines: true, trim: true }),
+  }),
   schema: z.object({
-    title: z.string(),
+    title: z.string().trim(),
     description: z.string(),
-    published: z.coerce.date(),
-
-    featured: z.boolean().default(false),
-
-    technologies: z.array(z.string()),
-
-    github: z.url().optional(),
-    demo: z.url().optional(),
-
-    thumbnail: z.string(),
-
-    order: z.number().default(999),
+    created_at: z.coerce.date(),
+    is_featured: z
+      .enum(["true", "false"])
+      .transform((value) => value === "true"),
+    github_url: z
+      .union([z.url(), z.literal("")])
+      .transform((value) => value || undefined),
+    live_url: z
+      .union([z.url(), z.literal("")])
+      .transform((value) => value || undefined),
+    image: z.url(),
   }),
 });
 

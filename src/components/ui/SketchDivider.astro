@@ -1,0 +1,29 @@
+---
+import "drawably/style.css";
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"hr">;
+const { class: className, ...attributes } = Astro.props;
+---
+
+<hr
+  {...attributes}
+  class:list={["drawably-divider", className]}
+  data-sketch-divider
+/>
+
+<script>
+  import { drawablyDivider } from "drawably";
+  import { initializeSketches } from "./initializeSketches";
+
+  initializeSketches<HTMLHRElement>("[data-sketch-divider]", (el) =>
+    drawablyDivider(el, { roughness: 0.8, boil: 0.2 }),
+  );
+</script>
+
+<style>
+  .drawably-divider {
+    margin: 0;
+    --drawably-stroke: var(--color-gray);
+  }
+</style>

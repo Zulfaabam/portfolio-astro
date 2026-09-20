@@ -1,0 +1,32 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends Omit<HTMLAttributes<"a">, "target" | "rel"> {
+  href: string;
+  underline?: boolean;
+}
+
+const { underline = false, class: className, ...attributes } = Astro.props;
+---
+
+<a
+  {...attributes}
+  class:list={["external-link", { "always-underlined": underline }, className]}
+  target="_blank"
+  rel="noopener noreferrer"><slot /> <span aria-hidden="true">↗</span></a
+>
+
+<style>
+  .external-link {
+    color: var(--color-blue);
+    text-underline-offset: 0.2em;
+  }
+  .external-link:hover,
+  .always-underlined {
+    text-decoration: underline;
+  }
+  .external-link:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 4px;
+  }
+</style>
