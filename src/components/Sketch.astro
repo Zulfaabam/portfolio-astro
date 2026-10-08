@@ -49,8 +49,11 @@ const hasMoreProjects = projects.length > initialIds.size;
         <div class="actions">
           <SketchButton
             fullWidth
-            data-show-projects
-            aria-controls="project-list">View My Projects</SketchButton
+            data-dialog-trigger="project-notes"
+            data-dialog-page="0"
+            aria-haspopup="dialog"
+            aria-controls="project-notes"
+            disabled={projects.length === 0}>View My Projects</SketchButton
           >
           <SketchButton variant="outline" fullWidth
             >Download Resume</SketchButton
@@ -87,7 +90,7 @@ const hasMoreProjects = projects.length > initialIds.size;
           <h3><span>Projects</span></h3>
           <ul id="project-list" class="drawably-list project-list">
             {
-              projects.map((project) => (
+              projects.map((project, projectIndex) => (
                 <li
                   hidden={!initialIds.has(project.id)}
                   data-project-row
@@ -99,9 +102,10 @@ const hasMoreProjects = projects.length > initialIds.size;
                   <button
                     type="button"
                     class="project-title"
-                    data-dialog-trigger={`project-note-${project.id}`}
+                    data-dialog-trigger="project-notes"
+                    data-dialog-page={projectIndex}
                     aria-haspopup="dialog"
-                    aria-controls={`project-note-${project.id}`}
+                    aria-controls="project-notes"
                   >
                     {project.title}
                   </button>
@@ -139,6 +143,7 @@ const hasMoreProjects = projects.length > initialIds.size;
                   data-load-more-projects
                   aria-controls="project-list"
                   aria-expanded="false"
+                  size="small"
                 >
                   <span data-project-toggle-label>Load more</span>
                 </SketchButton>
@@ -154,31 +159,29 @@ const hasMoreProjects = projects.length > initialIds.size;
   </div>
 </div>
 {
-  projects.map((project) => (
+  projects.length > 0 && (
     <PaperNoteCustomDialog
-      id={`project-note-${project.id}`}
-      title={project.title}
-      pages={[{ kicker: "Project details", title: project.title, body: "" }]}
-    >
-      <div class="project-details">
-        {project.description && <p>{project.description}</p>}
-        {project.repository ? (
-          <ExternalLink href={project.repository} underline>
-            View repository
-          </ExternalLink>
-        ) : (
-          <p>Private repository</p>
-        )}
-        {project.demo ? (
-          <ExternalLink href={project.demo} underline>
-            Visit live demo
-          </ExternalLink>
-        ) : (
-          <p>Demo coming soon</p>
-        )}
-      </div>
-    </PaperNoteCustomDialog>
-  ))
+      id="project-notes"
+      itemLabel="Project"
+      pages={projects.map((project) => ({
+        kicker: "Project details",
+        title: project.title,
+        body: project.description ?? "",
+        links: [
+          {
+            href: project.repository,
+            label: project.repository
+              ? "View repository"
+              : "Private repository",
+          },
+          {
+            href: project.demo,
+            label: project.demo ? "Visit live demo" : "Demo coming soon",
+          },
+        ],
+      }))}
+    />
+  )
 }
 
 <script>
@@ -188,18 +191,14 @@ const hasMoreProjects = projects.length > initialIds.size;
   // Delegation keeps the controls working after Astro client-side navigation.
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    const trigger = event.target.closest(
-      "[data-load-more-projects], [data-show-projects]",
-    );
+    const trigger = event.target.closest("[data-load-more-projects]");
     if (!trigger) return;
     const list = document.querySelector<HTMLElement>("#project-list");
     if (!list) return;
     const toggle = document.querySelector<HTMLButtonElement>(
       "[data-load-more-projects]",
     );
-    const expanded =
-      trigger.hasAttribute("data-show-projects") ||
-      toggle?.getAttribute("aria-expanded") !== "true";
+    const expanded = toggle?.getAttribute("aria-expanded") !== "true";
     const firstHidden = list.querySelector<HTMLElement>(
       "[data-project-row][hidden] .project-title",
     );
@@ -216,12 +215,7 @@ const hasMoreProjects = projects.length > initialIds.size;
       count.textContent = expanded
         ? `Showing all ${list.children.length} projects`
         : `Showing ${list.querySelectorAll("[data-project-row]:not([hidden])").length} of ${list.children.length} projects`;
-    if (trigger.hasAttribute("data-show-projects")) {
-      list
-        .querySelector<HTMLElement>(".project-title")
-        ?.focus({ preventScroll: true });
-      list.scrollIntoView({ block: "start" });
-    } else if (expanded) {
+    if (expanded) {
       firstHidden?.focus();
     } else {
       toggle?.focus();
@@ -403,13 +397,6 @@ const hasMoreProjects = projects.length > initialIds.size;
     outline: 2px solid var(--color-blue);
     outline-offset: 4px;
   }
-  .project-details {
-    display: grid;
-    gap: 1rem;
-  }
-  .project-details p {
-    margin: 0;
-  }
   @media (max-width: 860px) {
     .sketch-layout {
       grid-template-columns: 1fr;
@@ -422,7 +409,7 @@ const hasMoreProjects = projects.length > initialIds.size;
       margin: auto;
     }
     .drawably-list li {
-      grid-template-columns: 2rem 1fr;
+      grid-template-columns: 5rem 1fr;
     }
     .drawably-list small {
       grid-column: 2;

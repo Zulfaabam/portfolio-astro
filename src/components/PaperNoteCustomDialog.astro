@@ -1,12 +1,16 @@
 ---
+import ExternalLink from "./ui/ExternalLink.astro";
+
 interface Props {
   id: string;
   title?: string;
   triggerLabel?: string;
+  itemLabel?: string;
   pages?: Array<{
     kicker?: string;
     title: string;
     body: string;
+    links?: Array<{ href?: string | null; label: string }>;
   }>;
 }
 
@@ -14,6 +18,7 @@ const {
   id,
   title = "A little note",
   triggerLabel,
+  itemLabel = "Note",
   pages = [{ title, body: "" }],
 } = Astro.props;
 
@@ -35,7 +40,8 @@ const dialogId = id;
 <dialog
   class="custom-note-dialog"
   id={dialogId}
-  aria-labelledby={`${dialogId}-title`}
+  aria-labelledby={`${dialogId}-title-0`}
+  data-item-label={itemLabel}
 >
   <div class="custom-note-backdrop" data-custom-note-close></div>
   <div class="custom-note-stack" role="document" aria-live="polite">
@@ -53,6 +59,7 @@ const dialogId = id;
           <svg
             class="custom-note-shape"
             viewBox="0 0 440 560"
+            preserveAspectRatio="none"
             aria-hidden="true"
           />
           <div class="custom-note-content">
@@ -65,21 +72,32 @@ const dialogId = id;
               ×
             </button>
             <p class="custom-note-kicker">{page.kicker ?? "A little note"}</p>
-            <h2 id={pageIndex === 0 ? `${dialogId}-title` : undefined}>
-              {page.title}
-            </h2>
-            <div class="custom-note-body">{page.body || <slot />}</div>
+            <h2 id={`${dialogId}-title-${pageIndex}`}>{page.title}</h2>
+            <div class="custom-note-body">
+              <div class="custom-note-details">
+                {page.body ? <p>{page.body}</p> : <slot />}
+                {page.links?.map((link) =>
+                  link.href ? (
+                    <ExternalLink href={link.href} underline>
+                      {link.label}
+                    </ExternalLink>
+                  ) : (
+                    <p>{link.label}</p>
+                  ),
+                )}
+              </div>
+            </div>
             <div class="custom-note-footer">
               <p class="custom-note-status" data-custom-note-status>
-                Note {pageIndex + 1} of {pages.length}
+                {itemLabel} {pageIndex + 1} of {pages.length}
               </p>
               {pages.length > 1 && (
                 <div>
                   <button
                     class="custom-note-nav custom-note-nav-previous"
                     type="button"
-                    aria-label="Previous note"
-                    title="Previous note"
+                    aria-label={`Previous ${itemLabel.toLowerCase()}`}
+                    title={`Previous ${itemLabel.toLowerCase()}`}
                     data-custom-note-previous
                   >
                     <svg
@@ -91,8 +109,8 @@ const dialogId = id;
                   <button
                     class="custom-note-nav custom-note-nav-next"
                     type="button"
-                    aria-label="Next note"
-                    title="Next note"
+                    aria-label={`Next ${itemLabel.toLowerCase()}`}
+                    title={`Next ${itemLabel.toLowerCase()}`}
                     data-custom-note-next
                   >
                     <svg
@@ -233,6 +251,10 @@ const dialogId = id;
         });
 
         const updateStack = () => {
+          dialog.setAttribute(
+            "aria-labelledby",
+            `${dialog.id}-title-${pageIndex}`,
+          );
           pages.forEach((page, index) => {
             const depth = (index - pageIndex + pages.length) % pages.length;
             page.dataset.depth = String(depth);
@@ -241,7 +263,7 @@ const dialogId = id;
             page.inert = depth !== 0;
           });
           statuses.forEach((status) => {
-            status.textContent = `Note ${pageIndex + 1} of ${pages.length}`;
+            status.textContent = `${dialog.dataset.itemLabel ?? "Note"} ${pageIndex + 1} of ${pages.length}`;
           });
           nextButtons.forEach((button) => {
             button.disabled = pages.length < 2;
@@ -273,18 +295,28 @@ const dialogId = id;
           }, 760);
         };
 
-        const open = () => {
+        const open = (opener: HTMLButtonElement) => {
           if (closeTimer) window.clearTimeout(closeTimer);
-          pageIndex = 0;
+          const requestedPage = Number(opener.dataset.dialogPage ?? 0);
+          pageIndex =
+            Number.isInteger(requestedPage) &&
+            requestedPage >= 0 &&
+            requestedPage < pages.length
+              ? requestedPage
+              : 0;
           updateStack();
           lastFocused = document.activeElement as HTMLElement;
           dialog.dataset.state = "opening";
           document.body.classList.add("custom-note-scroll-locked");
           dialog.showModal();
           requestAnimationFrame(() => (dialog.dataset.state = "open"));
-          dialog.querySelector<HTMLElement>(".custom-note-close")?.focus();
+          dialog
+            .querySelector<HTMLElement>('[data-depth="0"] .custom-note-close')
+            ?.focus();
         };
-        openers.forEach((opener) => opener.addEventListener("click", open));
+        openers.forEach((opener) =>
+          opener.addEventListener("click", () => open(opener)),
+        );
         closeButtons.forEach((button) =>
           button.addEventListener("click", close),
         );
@@ -365,7 +397,7 @@ const dialogId = id;
   }
 
   .custom-note-dialog {
-    width: min(520px, calc(100vw - 2rem));
+    width: min(720px, calc(100vw - 2rem));
     max-width: none;
     padding: 0;
     border: 0;
@@ -392,6 +424,7 @@ const dialogId = id;
   }
 
   .custom-note-page {
+    opacity: 0;
     position: absolute;
     inset: 0;
     min-height: min(660px, calc(100vh - 4rem));
@@ -607,6 +640,15 @@ const dialogId = id;
     word-break: break-word;
     font-size: 0.95rem;
     line-height: 1.8;
+  }
+
+  .custom-note-details {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .custom-note-details p {
+    margin: 0;
   }
 
   @media (max-width: 640px) {

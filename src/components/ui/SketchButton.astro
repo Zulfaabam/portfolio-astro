@@ -4,11 +4,13 @@ import type { HTMLAttributes } from "astro/types";
 
 interface Props extends HTMLAttributes<"button"> {
   variant?: "solid" | "outline";
+  size?: "small" | "default" | "large";
   fullWidth?: boolean;
 }
 
 const {
   variant = "solid",
+  size = "default",
   fullWidth = false,
   type = "button",
   class: className,
@@ -22,11 +24,14 @@ const {
   class:list={[
     "drawably-button",
     `sketch-button-${variant}`,
+    `sketch-button-${size}`,
     { "full-width": fullWidth },
     className,
   ]}
-  data-sketch-button={variant}><slot /></button
+  data-sketch-button={variant}
 >
+  <slot />
+</button>
 
 <script>
   import { drawablyButton } from "drawably";
@@ -37,15 +42,25 @@ const {
       roughness: 0.8,
       boil: 0.2,
       variant: el.dataset.sketchButton === "outline" ? "outline" : "solid",
-    }),
+    })
   );
 </script>
 
 <style>
   .drawably-button {
-    padding: 0.7rem 1rem;
     font: inherit;
     cursor: pointer;
+  }
+  .sketch-button-small {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.875em;
+  }
+  .sketch-button-default {
+    padding: 0.7rem 1rem;
+  }
+  .sketch-button-large {
+    padding: 0.95rem 1.5rem;
+    font-size: 1.125em;
   }
   .full-width {
     width: 100%;
