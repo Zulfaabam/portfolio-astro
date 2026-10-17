@@ -7,6 +7,7 @@ import PaperNoteCustomDialog from "./PaperNoteCustomDialog.astro";
 import SketchButton from "./ui/SketchButton.astro";
 import ExternalLink from "./ui/ExternalLink.astro";
 import SketchDivider from "./ui/SketchDivider.astro";
+import projectPlaceholder from "../assets/project-placeholder.svg";
 
 const homeContent = await getEntry("home", "home");
 const miniJourneys =
@@ -167,6 +168,14 @@ const hasMoreProjects = projects.length > initialIds.size;
         kicker: "Project details",
         title: project.title,
         body: project.description ?? "",
+        // Temporary artwork: replace with this project's screenshots when ready.
+        images: [
+          {
+            src: projectPlaceholder.src,
+            alt: "Placeholder for a project overview screenshot",
+            caption: "01 / The overview",
+          },
+        ],
         links: [
           {
             href: project.repository,
