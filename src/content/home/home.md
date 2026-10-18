@@ -1,7 +1,7 @@
 ---
 intro: "I was born and live in Semarang, Indonesia. Currently a Software Engineer Intern @ Formulatrix.\n
 \n
-In the last 3 years or so, I mostly work as a Frontend Developer building production-grade web applications using React, Next.js, and TypeScript. I am always seeking new opportunities, try to surpass my limit, and make sure I still enjoy to code & read the code. Now focusing on my internship @ Formulatrix, tinkering with C# & .NET projects."
+In the last 3 years or so, I mostly work as a Frontend Developer building production-grade web applications using React, Next.js, and TypeScript. I am always seeking new opportunities, try to learn new things, and make sure I still enjoy to code & read the code. Now focusing on my internship with the amazing people in the Rock Imager® Team @ Formulatrix Indonesia."
 
 miniJourneys:
   - id: 1

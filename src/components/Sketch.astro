@@ -5,9 +5,8 @@ import { getEntry, getCollection } from "astro:content";
 import ProfileCard from "./ProfileCard.astro";
 import PaperNoteCustomDialog from "./PaperNoteCustomDialog.astro";
 import SketchButton from "./ui/SketchButton.astro";
-import ExternalLink from "./ui/ExternalLink.astro";
+import FeaturedProjects from "./FeaturedProjects.astro";
 import SketchDivider from "./ui/SketchDivider.astro";
-import projectPlaceholder from "../assets/project-placeholder.svg";
 
 const homeContent = await getEntry("home", "home");
 const miniJourneys =
@@ -24,22 +23,14 @@ const projects = (await getCollection("projects"))
     repository: data.github_url,
     demo: data.live_url,
     featured: data.is_featured,
+    image: data.image,
     status: data.is_featured
       ? "Featured"
       : String(data.created_at.getUTCFullYear()),
   }));
-const initialIds = new Set(
-  projects
-    .filter((project) => project.featured)
-    .slice(0, 3)
-    .map((project) => project.id),
-);
-// Keep the preview useful if fewer than three projects are marked featured.
-for (const project of projects) {
-  if (initialIds.size >= 3) break;
-  initialIds.add(project.id);
-}
-const hasMoreProjects = projects.length > initialIds.size;
+const featuredProjects = projects
+  .filter((project) => project.featured)
+  .slice(0, 3);
 ---
 
 <div class="sketch-page">
@@ -89,71 +80,20 @@ const hasMoreProjects = projects.length > initialIds.size;
 
         <div class="chapter">
           <h3><span>Projects</span></h3>
-          <ul id="project-list" class="drawably-list project-list">
-            {
-              projects.map((project, projectIndex) => (
-                <li
-                  hidden={!initialIds.has(project.id)}
-                  data-project-row
-                  data-project-preview={
-                    initialIds.has(project.id) ? "true" : "false"
-                  }
-                >
-                  <span class="project-status">{project.status}</span>
-                  <button
-                    type="button"
-                    class="project-title"
-                    data-dialog-trigger="project-notes"
-                    data-dialog-page={projectIndex}
-                    aria-haspopup="dialog"
-                    aria-controls="project-notes"
-                  >
-                    {project.title}
-                  </button>
-                  <span class="project-links">
-                    {project.repository && (
-                      <ExternalLink
-                        href={project.repository}
-                        aria-label={`${project.title} repository`}
-                      >
-                        Code
-                      </ExternalLink>
-                    )}
-                    {project.demo && (
-                      <ExternalLink
-                        href={project.demo}
-                        aria-label={`${project.title} live demo`}
-                      >
-                        Demo
-                      </ExternalLink>
-                    )}
-                    {!project.repository && !project.demo && (
-                      <small>Private</small>
-                    )}
-                  </span>
-                  <SketchDivider class="row-divider" />
-                </li>
-              ))
-            }
-          </ul>
-          {
-            hasMoreProjects && (
-              <div data-load-more-wrapper>
-                <SketchButton
-                  variant="outline"
-                  data-load-more-projects
-                  aria-controls="project-list"
-                  aria-expanded="false"
-                  size="small"
-                >
-                  <span data-project-toggle-label>Load more</span>
-                </SketchButton>
-              </div>
-            )
-          }
-          <p class="project-count" data-project-count role="status">
-            Showing {initialIds.size} of {projects.length} projects
-          </p>
+          <FeaturedProjects projects={featuredProjects} />
+          <div class="load-more-btn">
+            <SketchButton
+              variant="outline"
+              data-dialog-trigger="project-notes"
+              data-dialog-page="0"
+              aria-haspopup="dialog"
+              aria-controls="project-notes"
+              disabled={projects.length === 0}
+              size="small"
+            >
+              Load more
+            </SketchButton>
+          </div>
         </div>
       </section>
     </main>
@@ -165,14 +105,13 @@ const hasMoreProjects = projects.length > initialIds.size;
       id="project-notes"
       itemLabel="Project"
       pages={projects.map((project) => ({
-        kicker: "Project details",
+        kicker: project.title,
         title: project.title,
         body: project.description ?? "",
-        // Temporary artwork: replace with this project's screenshots when ready.
         images: [
           {
-            src: projectPlaceholder.src,
-            alt: "Placeholder for a project overview screenshot",
+            src: project.image,
+            alt: `${project.title} overview screenshot`,
             caption: "01 / The overview",
           },
         ],
@@ -197,49 +136,15 @@ const hasMoreProjects = projects.length > initialIds.size;
   import { drawablyBadge, drawablyCard } from "drawably";
   import { initializeSketches } from "./ui/initializeSketches";
 
-  // Delegation keeps the controls working after Astro client-side navigation.
-  document.addEventListener("click", (event) => {
-    if (!(event.target instanceof Element)) return;
-    const trigger = event.target.closest("[data-load-more-projects]");
-    if (!trigger) return;
-    const list = document.querySelector<HTMLElement>("#project-list");
-    if (!list) return;
-    const toggle = document.querySelector<HTMLButtonElement>(
-      "[data-load-more-projects]",
-    );
-    const expanded = toggle?.getAttribute("aria-expanded") !== "true";
-    const firstHidden = list.querySelector<HTMLElement>(
-      "[data-project-row][hidden] .project-title",
-    );
-    list.querySelectorAll<HTMLElement>("[data-project-row]").forEach((row) => {
-      row.hidden = !expanded && row.dataset.projectPreview !== "true";
-    });
-    toggle?.setAttribute("aria-expanded", String(expanded));
-    const label = toggle?.querySelector<HTMLElement>(
-      "[data-project-toggle-label]",
-    );
-    if (label) label.textContent = expanded ? "Show less" : "Load more";
-    const count = document.querySelector<HTMLElement>("[data-project-count]");
-    if (count)
-      count.textContent = expanded
-        ? `Showing all ${list.children.length} projects`
-        : `Showing ${list.querySelectorAll("[data-project-row]:not([hidden])").length} of ${list.children.length} projects`;
-    if (expanded) {
-      firstHidden?.focus();
-    } else {
-      toggle?.focus();
-    }
-  });
-
   initializeSketches("[data-drawably-card]", (el) =>
     drawablyCard(el, {
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    }),
+    })
   );
   initializeSketches("[data-drawably-badge]", (el) =>
-    drawablyBadge(el, { roughness: 0.8, boil: 0.2, variant: "outline" }),
+    drawablyBadge(el, { roughness: 0.8, boil: 0.2, variant: "outline" })
   );
 </script>
 
@@ -339,18 +244,6 @@ const hasMoreProjects = projects.length > initialIds.size;
   .drawably-list li:last-child {
     border-bottom: 0;
   }
-  .project-list li[hidden],
-  [data-load-more-wrapper][hidden] {
-    display: none;
-  }
-  .project-list {
-    scroll-margin-top: calc(var(--nav-height) + 1rem);
-  }
-  .project-count {
-    margin: 0;
-    color: var(--color-dark-gray);
-    font-size: 0.75rem;
-  }
   .row-divider {
     position: absolute;
     bottom: -5px;
@@ -364,7 +257,7 @@ const hasMoreProjects = projects.length > initialIds.size;
 
   .number,
   .job-year {
-    color: var(--color-blue);
+    color: var(--color-dark-gray);
     font-size: 0.75rem;
   }
 
@@ -372,40 +265,11 @@ const hasMoreProjects = projects.length > initialIds.size;
     color: var(--color-dark-gray);
     font-size: 0.7rem;
   }
-  .project-title {
-    min-width: 0;
-    padding: 0;
-    border: 0;
-    color: var(--color-black);
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    background: transparent;
+
+  .load-more-btn {
+    margin-left: auto;
   }
-  .project-status {
-    color: var(--color-blue);
-    font-size: 0.75rem;
-  }
-  .project-links {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    font-size: 0.75rem;
-    color: var(--color-blue);
-  }
-  .project-links a {
-    white-space: nowrap;
-  }
-  .project-title:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-  .project-title:focus-visible {
-    outline: 2px solid var(--color-blue);
-    outline-offset: 4px;
-  }
+
   @media (max-width: 860px) {
     .sketch-layout {
       grid-template-columns: 1fr;
@@ -422,9 +286,6 @@ const hasMoreProjects = projects.length > initialIds.size;
     }
     .drawably-list small {
       grid-column: 2;
-    }
-    .project-list li {
-      grid-template-columns: 5rem minmax(0, 1fr) auto;
     }
   }
 </style>

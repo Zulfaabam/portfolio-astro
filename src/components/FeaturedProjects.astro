@@ -1,0 +1,347 @@
+---
+import { parse } from "csv-parse/sync";
+import techCsv from "../content/tech_stack.csv?raw";
+import projectTechCsv from "../content/project_tech_stack.csv?raw";
+import ExternalLink from "./ui/ExternalLink.astro";
+
+interface Props {
+  projects: {
+    id: string;
+    title: string;
+    description: string;
+    image: string;
+    demo?: string;
+    repository?: string;
+  }[];
+}
+const { projects } = Astro.props;
+const technologies: { id: string; name: string }[] = parse(techCsv, {
+  columns: true,
+  skip_empty_lines: true,
+});
+const relations: { project_id: string; tech_stack_id: string }[] = parse(
+  projectTechCsv,
+  { columns: true, skip_empty_lines: true }
+);
+const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
+---
+
+<div class="featured-projects" data-featured-projects>
+  <div class="project-stage">
+    {
+      projects.map((project, index) => (
+        <article
+          id={`featured-${project.id}`}
+          data-featured-panel
+          hidden={index !== 0}
+          aria-labelledby={`featured-title-${project.id}`}
+        >
+          <div class="project-image-frame" data-project-frame>
+            <img
+              class="project-image"
+              src={project.image}
+              alt={`${project.title} preview`}
+              width="800"
+              height="450"
+              loading="eager"
+            />
+          </div>
+          <div class="project-heading">
+            <h4 id={`featured-title-${project.id}`}>{project.title}</h4>
+            <div class="project-links">
+              {project.demo && (
+                <ExternalLink
+                  href={project.demo}
+                  aria-label={`Visit ${project.title}`}
+                >
+                  <span class="live-dot" />
+                  Live
+                </ExternalLink>
+              )}
+              {project.repository && (
+                <ExternalLink
+                  href={project.repository}
+                  aria-label={`${project.title} repository`}
+                >
+                  Code
+                </ExternalLink>
+              )}
+              {!project.demo && !project.repository && <span>Private</span>}
+            </div>
+          </div>
+          <p class="project-description">{project.description}</p>
+          <ul class="tech-stack" aria-label="Technology stack">
+            {relations
+              .filter((relation) => relation.project_id === project.id)
+              .map((relation) => techNames.get(relation.tech_stack_id))
+              .filter(Boolean)
+              .map((name) => (
+                <li>
+                  <span class="tech-badge" data-tech-badge>
+                    {name}
+                  </span>
+                </li>
+              ))}
+          </ul>
+        </article>
+      ))
+    }
+  </div>
+  <div
+    class="project-picker"
+    data-project-frame
+    role="group"
+    aria-label="Choose a featured project"
+  >
+    {
+      projects.map((project, index) => (
+        <button
+          type="button"
+          class="project-thumbnail"
+          data-featured-select={project.id}
+          aria-pressed={index === 0 ? "true" : "false"}
+          aria-controls={`featured-${project.id}`}
+          aria-label={`Show ${project.title}`}
+        >
+          <img
+            src={project.image}
+            alt=""
+            width="320"
+            height="180"
+            loading="lazy"
+          />
+          <span class="active-label" aria-hidden="true">
+            Active
+          </span>
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  import { drawablyBadge, drawablyCard } from "drawably";
+  import { initializeSketches } from "./ui/initializeSketches";
+
+  initializeSketches("[data-tech-badge]", (element) =>
+    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 })
+  );
+
+  initializeSketches("[data-project-frame]", (element) =>
+    drawablyCard(element, { roughness: 0.8, boil: 0.2 })
+  );
+
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+    const button = event.target.closest<HTMLButtonElement>(
+      "[data-featured-select]"
+    );
+    const showcase = button?.closest("[data-featured-projects]");
+    if (!button || !showcase) return;
+    if (button.getAttribute("aria-pressed") === "true") return;
+    showcase
+      .querySelectorAll<HTMLButtonElement>("[data-featured-select]")
+      .forEach((item) => {
+        item.setAttribute("aria-pressed", String(item === button));
+      });
+    showcase
+      .querySelectorAll<HTMLElement>("[data-featured-panel]")
+      .forEach((panel) => {
+        // Pointer selection reveals the image; keyboard navigation stays instant.
+        panel.toggleAttribute("data-image-reveal", event.detail > 0);
+        panel.hidden = panel.id !== button.getAttribute("aria-controls");
+      });
+  });
+</script>
+
+<style>
+  .featured-projects {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .project-stage {
+    min-width: 0;
+  }
+  [hidden] {
+    display: none;
+  }
+  [data-project-frame] {
+    --drawably-stroke: color-mix(
+      in srgb,
+      var(--color-gray) 45%,
+      var(--color-white)
+    );
+  }
+  [data-project-frame] > :global(.drawably-svg) {
+    z-index: 1;
+  }
+  .project-image-frame {
+    position: relative;
+    aspect-ratio: 1.85;
+    overflow: hidden;
+    border-radius: 0.6rem;
+    padding: 0.5rem;
+    background:
+      radial-gradient(
+        ellipse at top right,
+        var(--color-paper),
+        transparent 70%
+      ),
+      color-mix(in srgb, var(--color-white) 70%, var(--color-gray));
+  }
+  .project-image {
+    position: absolute;
+    top: 15%;
+    left: 7.5%;
+    display: block;
+    width: 85%;
+    /* Extend past the frame so the screenshot meets its bottom edge cleanly. */
+    height: 90%;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 0.5rem 0.5rem 0 0;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transform-origin: center bottom;
+  }
+  [data-image-reveal] .project-image {
+    transition:
+      transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+      opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @starting-style {
+    [data-image-reveal] .project-image {
+      opacity: 0;
+      transform: translateY(24%) scale(0.96);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-image-reveal] .project-image {
+      transition: opacity 150ms ease;
+    }
+    @starting-style {
+      [data-image-reveal] .project-image {
+        transform: none;
+      }
+    }
+  }
+  .project-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .project-links {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.75rem;
+    color: var(--color-dark-gray);
+  }
+  .live-dot {
+    display: inline-block;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-right: 0.3rem;
+    border-radius: 50%;
+    background: #22b864;
+  }
+  .project-description {
+    margin: 0.65rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--color-dark-gray);
+  }
+  .tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+  }
+  .tech-badge {
+    display: inline-block;
+    padding: 0.4rem 0.5rem;
+    font: inherit;
+    font-size: 0.65rem;
+    color: var(--color-black);
+    --drawably-stroke: var(--color-gray);
+    --drawably-fill: var(--color-gray);
+  }
+  /* Drawably badges expose outline/scribble variants; fill the sketch itself. */
+  .tech-badge :global(.drawably-outline) {
+    fill: var(--color-gray);
+  }
+  .project-picker {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.8rem;
+    background: color-mix(in srgb, var(--color-white) 85%, var(--color-gray));
+    border-radius: 0.6rem;
+  }
+  .project-thumbnail {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    cursor: pointer;
+    color: white;
+    font: inherit;
+  }
+  .project-thumbnail img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+  .active-label {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5rem;
+    display: none;
+    place-items: center;
+    background: rgb(0 0 0 / 48%);
+    backdrop-filter: blur(2px);
+    font-size: 0.85rem;
+  }
+  .project-thumbnail[aria-pressed="true"] {
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 18%),
+      0 6px 14px rgb(0 0 0 / 12%);
+  }
+  .project-thumbnail[aria-pressed="true"] .active-label {
+    display: grid;
+  }
+  .project-thumbnail:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+  @media (max-width: 560px) {
+    .featured-projects {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+    }
+    .project-picker {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .active-label {
+      font-size: 0.7rem;
+    }
+  }
+</style>
