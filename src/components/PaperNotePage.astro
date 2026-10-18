@@ -1,0 +1,346 @@
+---
+interface Props {
+  /** Accessible name of this page and the dialog while it is active. */
+  label: string;
+  itemLabel?: string;
+}
+const { label, itemLabel = "Note" } = Astro.props;
+---
+
+<article class="custom-note-page" data-custom-note-page data-page-label={label}>
+  <svg
+    class="custom-note-shape"
+    viewBox="0 0 440 560"
+    preserveAspectRatio="none"
+    aria-hidden="true"></svg>
+  <div class="custom-note-content">
+    <button
+      class="custom-note-close"
+      type="button"
+      aria-label="Close note"
+      data-custom-note-close
+    >
+      ×
+    </button>
+    <div class="custom-note-body"><slot /></div>
+    <div class="custom-note-footer">
+      <p class="custom-note-status" data-custom-note-status></p>
+
+      <div>
+        <button
+          class="custom-note-nav custom-note-nav-previous"
+          type="button"
+          aria-label={`Previous ${itemLabel.toLowerCase()}`}
+          title={`Previous ${itemLabel.toLowerCase()}`}
+          data-custom-note-previous
+        >
+          <svg
+            class="custom-note-nav-icon"
+            viewBox="0 0 32 24"
+            aria-hidden="true"></svg>
+        </button>
+        <button
+          class="custom-note-nav custom-note-nav-next"
+          type="button"
+          aria-label={`Next ${itemLabel.toLowerCase()}`}
+          title={`Next ${itemLabel.toLowerCase()}`}
+          data-custom-note-next
+        >
+          <svg
+            class="custom-note-nav-icon"
+            viewBox="0 0 32 24"
+            aria-hidden="true"></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
+<style>
+  .custom-note-nav[hidden] {
+    display: none;
+  }
+  .custom-note-close,
+  .custom-note-nav {
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .custom-note-close:active,
+  .custom-note-nav:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .custom-note-page {
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition:
+      transform 560ms cubic-bezier(0.22, 0.75, 0.25, 1),
+      opacity 220ms ease;
+  }
+  .custom-note-page[data-depth="0"] {
+    z-index: 4;
+    opacity: 1;
+  }
+  .custom-note-page[data-depth="1"] {
+    z-index: 3;
+    transform: translate3d(0.65rem, 0.55rem, -20px) rotate(1.2deg);
+    opacity: 0.94;
+  }
+  .custom-note-page[data-depth="2"] {
+    z-index: 2;
+    transform: translate3d(1.15rem, 1rem, -40px) rotate(-1.3deg);
+    opacity: 0.88;
+  }
+  .custom-note-page[data-depth="3"] {
+    z-index: 1;
+    transform: translate3d(1.6rem, 1.35rem, -60px) rotate(1.8deg);
+    opacity: 0.8;
+  }
+  :global(.custom-note-dialog)[data-state="opening"] .custom-note-page {
+    transform: translate3d(0, 115vh, 120px) rotate(11deg);
+    opacity: 0;
+  }
+  :global(.custom-note-dialog)[data-state="opening"]
+    .custom-note-page[data-depth="1"] {
+    transition-delay: 60ms;
+  }
+  :global(.custom-note-dialog)[data-state="opening"]
+    .custom-note-page[data-depth="2"] {
+    transition-delay: 120ms;
+  }
+  :global(.custom-note-dialog)[data-state="opening"]
+    .custom-note-page[data-depth="3"] {
+    transition-delay: 180ms;
+  }
+  :global(.custom-note-dialog)[data-state="closing"] .custom-note-page {
+    transform: translate3d(0, 115vh, 120px) rotate(11deg);
+    opacity: 0;
+    transition:
+      transform 560ms cubic-bezier(0.42, 0, 1, 1),
+      opacity 420ms ease;
+  }
+  :global(.custom-note-dialog)[data-state="closing"]
+    .custom-note-page[data-depth="0"] {
+    z-index: 5;
+  }
+  :global(.custom-note-dialog)[data-state="closing"]
+    .custom-note-page[data-depth="1"] {
+    transition-delay: 60ms;
+  }
+  :global(.custom-note-dialog)[data-state="closing"]
+    .custom-note-page[data-depth="2"] {
+    transition-delay: 120ms;
+  }
+  :global(.custom-note-dialog)[data-state="closing"]
+    .custom-note-page[data-depth="3"] {
+    transition-delay: 180ms;
+  }
+  .custom-note-shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .custom-note-content {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    height: 100%;
+    padding: 4rem 3.5rem 3rem;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  .custom-note-page[data-page-index="0"] .custom-note-content {
+    transition:
+      opacity 220ms ease 260ms,
+      transform 220ms ease 260ms;
+  }
+  :global(.custom-note-dialog)[data-state="open"]
+    .custom-note-page[data-page-index="0"]
+    .custom-note-content,
+  .custom-note-page[data-depth="0"]:not([data-page-index="0"])
+    .custom-note-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .custom-note-page:not([data-depth="0"]) .custom-note-content {
+    pointer-events: none;
+    opacity: 0;
+  }
+  .custom-note-page:not([data-depth="0"]) .custom-note-nav {
+    pointer-events: none;
+    opacity: 0;
+  }
+  .custom-note-page[data-depth="0"] .custom-note-content {
+    transition: none;
+  }
+  :global(.custom-note-dialog)[data-state="opening"]
+    .custom-note-page[data-page-index="0"]
+    .custom-note-content {
+    transition:
+      opacity 220ms ease 260ms,
+      transform 220ms ease 260ms;
+  }
+  .custom-note-close {
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    top: clamp(1.5rem, 4vw, 2.5rem);
+    right: clamp(1.5rem, 4vw, 2.5rem);
+    border: 0;
+    background: transparent;
+    color: var(--color-black);
+    font: inherit;
+    font-size: 1.75rem;
+    cursor: pointer;
+  }
+  .custom-note-nav {
+    z-index: 5;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    place-items: center;
+    color: var(--color-black);
+    font: inherit;
+    cursor: pointer;
+    --drawably-stroke: var(--color-blue);
+    --drawably-fill: var(--color-paper);
+  }
+  .custom-note-footer {
+    flex-shrink: 0;
+    padding-block-start: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .custom-note-footer > div {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.75rem;
+  }
+  .custom-note-nav-icon {
+    width: 1.5rem;
+    height: 1.125rem;
+    overflow: visible;
+  }
+  .custom-note-nav:disabled {
+    cursor: wait;
+    opacity: 0.5;
+  }
+  .custom-note-status {
+    margin: 0.8rem 0 0;
+    color: var(--color-dark-gray);
+    font-size: 0.75rem;
+  }
+  .custom-note-body {
+    --scrollbar-track: #eee5d0;
+    --scrollbar-thumb: color-mix(in srgb, var(--color-paper) 80%, #eee5d0);
+    min-height: 0;
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    overscroll-behavior: contain;
+  }
+  @supports selector(::-webkit-scrollbar) {
+    .custom-note-body {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+    .custom-note-body::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    .custom-note-body::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+      border-radius: 12px;
+      margin-block: 0.5rem;
+    }
+    .custom-note-body::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border: 2px solid var(--scrollbar-track);
+      border-radius: 12px;
+      min-height: 36px;
+    }
+    .custom-note-body::-webkit-scrollbar-thumb:hover,
+    .custom-note-body::-webkit-scrollbar-thumb:active {
+      background: var(--color-blue);
+    }
+    .custom-note-body::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
+  @media (forced-colors: active) {
+    .custom-note-body {
+      --scrollbar-track: Canvas;
+      --scrollbar-thumb: ButtonText;
+      scrollbar-color: auto;
+    }
+    .custom-note-body::-webkit-scrollbar-thumb:hover,
+    .custom-note-body::-webkit-scrollbar-thumb:active {
+      background: Highlight;
+    }
+  }
+  @media (max-width: 760px) {
+    .custom-note-content {
+      padding: 3.5rem 1.25rem 2rem;
+    }
+    .custom-note-close {
+      top: 1rem;
+      right: 1rem;
+    }
+    .custom-note-footer {
+      gap: 0.75rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .custom-note-page[data-depth],
+    :global(.custom-note-dialog)[data-state="opening"] .custom-note-page,
+    :global(.custom-note-dialog)[data-state="closing"] .custom-note-page {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+    .custom-note-page {
+      transition: opacity 200ms ease;
+    }
+    .custom-note-content {
+      transform: none;
+      transition: opacity 200ms ease;
+    }
+    .custom-note-page[data-depth="0"] .custom-note-content {
+      transition: opacity 200ms ease;
+    }
+    .custom-note-page[data-page-index="0"] .custom-note-content,
+    :global(.custom-note-dialog)[data-state="opening"]
+      .custom-note-page[data-page-index="0"]
+      .custom-note-content {
+      transform: none;
+      transition: opacity 200ms ease;
+      transition-delay: 0ms;
+    }
+    :global(.custom-note-dialog)[data-state="closing"] .custom-note-page {
+      opacity: 0;
+      transition-delay: 0ms;
+    }
+    :global(.custom-note-dialog)[data-state="opening"] .custom-note-page {
+      opacity: 0;
+      transition-delay: 0ms;
+    }
+    :global(.custom-note-dialog)[data-state="opening"]
+      .custom-note-page[data-depth],
+    :global(.custom-note-dialog)[data-state="closing"]
+      .custom-note-page[data-depth] {
+      transition: opacity 200ms ease;
+      transition-delay: 0ms;
+    }
+  }
+</style>

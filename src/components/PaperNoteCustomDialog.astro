@@ -1,29 +1,16 @@
 ---
-import ExternalLink from "./ui/ExternalLink.astro";
-
 interface Props {
   id: string;
   title?: string;
   triggerLabel?: string;
   itemLabel?: string;
-  pages?: Array<{
-    kicker?: string;
-    title: string;
-    body: string;
-    links?: Array<{ href?: string | null; label: string }>;
-    images?: Array<{ src: string; alt: string; caption?: string }>;
-  }>;
 }
-
 const {
-  id,
+  id: dialogId,
   title = "A little note",
   triggerLabel,
   itemLabel = "Note",
-  pages = [{ title, body: "" }],
 } = Astro.props;
-
-const dialogId = id;
 ---
 
 {
@@ -41,125 +28,12 @@ const dialogId = id;
 <dialog
   class="custom-note-dialog"
   id={dialogId}
-  aria-labelledby={`${dialogId}-title-0`}
+  aria-label={title}
   data-item-label={itemLabel}
 >
   <div class="custom-note-backdrop" data-custom-note-close></div>
   <div class="custom-note-stack" role="document" aria-live="polite">
-    {
-      pages.map((page, pageIndex) => (
-        <article
-          class:list={[
-            "custom-note-page",
-            pageIndex === 0 && "custom-note-page-front",
-          ]}
-          data-custom-note-page
-          data-page-index={pageIndex}
-          aria-hidden={pageIndex === 0 ? undefined : "true"}
-        >
-          <svg
-            class="custom-note-shape"
-            viewBox="0 0 440 560"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          />
-          <div class="custom-note-content">
-            <button
-              class="custom-note-close"
-              type="button"
-              aria-label="Close note"
-              data-custom-note-close
-            >
-              ×
-            </button>
-            <div
-              class:list={[
-                "custom-note-body",
-                { "scrapbook-layout": page.images?.length },
-              ]}
-            >
-              <header class="custom-note-heading">
-                <p class="custom-note-kicker">
-                  {page.kicker ?? "A little note"}
-                </p>
-                <h2 id={`${dialogId}-title-${pageIndex}`}>{page.title}</h2>
-              </header>
-              <div class="custom-note-details">
-                <div class="scrapbook-note">
-                  {page.body ? <p>{page.body}</p> : <slot />}
-                </div>
-                {page.links?.length && (
-                  <div class="scrapbook-links">
-                    <span class="scrapbook-label">Explore the project</span>
-                    {page.links?.map((link) =>
-                      link.href ? (
-                        <ExternalLink href={link.href} underline>
-                          {link.label}
-                        </ExternalLink>
-                      ) : (
-                        <p>{link.label}</p>
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-              {page.images?.length && (
-                <div class="scrapbook-photos">
-                  {page.images.slice(0, 1).map((image) => (
-                    <figure class="scrapbook-photo">
-                      <img
-                        src={image.src}
-                        alt={image.alt}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      {image.caption && (
-                        <figcaption>{image.caption}</figcaption>
-                      )}
-                    </figure>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div class="custom-note-footer">
-              <p class="custom-note-status" data-custom-note-status>
-                {itemLabel} {pageIndex + 1} of {pages.length}
-              </p>
-              {pages.length > 1 && (
-                <div>
-                  <button
-                    class="custom-note-nav custom-note-nav-previous"
-                    type="button"
-                    aria-label={`Previous ${itemLabel.toLowerCase()}`}
-                    title={`Previous ${itemLabel.toLowerCase()}`}
-                    data-custom-note-previous
-                  >
-                    <svg
-                      class="custom-note-nav-icon"
-                      viewBox="0 0 32 24"
-                      aria-hidden="true"
-                    />
-                  </button>
-                  <button
-                    class="custom-note-nav custom-note-nav-next"
-                    type="button"
-                    aria-label={`Next ${itemLabel.toLowerCase()}`}
-                    title={`Next ${itemLabel.toLowerCase()}`}
-                    data-custom-note-next
-                  >
-                    <svg
-                      class="custom-note-nav-icon"
-                      viewBox="0 0 32 24"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </article>
-      ))
-    }
+    <slot />
   </div>
 </dialog>
 
@@ -200,7 +74,7 @@ const dialogId = id;
         let swipeStartX: number | null = null;
         let swipeStartY: number | null = null;
 
-        if (!stack) return;
+        if (!stack || pages.length === 0) return;
 
         const attachNavigationIcon = (
           button: HTMLButtonElement,
@@ -286,8 +160,8 @@ const dialogId = id;
 
         const updateStack = () => {
           dialog.setAttribute(
-            "aria-labelledby",
-            `${dialog.id}-title-${pageIndex}`
+            "aria-label",
+            pages[pageIndex].dataset.pageLabel ?? "A little note"
           );
           pages.forEach((page, index) => {
             const depth = (index - pageIndex + pages.length) % pages.length;
@@ -299,10 +173,13 @@ const dialogId = id;
           statuses.forEach((status) => {
             status.textContent = `${dialog.dataset.itemLabel ?? "Note"} ${pageIndex + 1} of ${pages.length}`;
           });
-          nextButtons.forEach((button) => {
+          [...previousButtons, ...nextButtons].forEach((button) => {
+            button.hidden = pages.length < 2;
             button.disabled = pages.length < 2;
           });
         };
+
+        updateStack();
 
         const changePage = (direction: -1 | 1) => {
           if (pages.length < 2) return;
@@ -412,615 +289,42 @@ const dialogId = id;
     font: inherit;
     cursor: pointer;
   }
-
-  .custom-note-trigger,
-  .custom-note-close,
-  .custom-note-nav {
+  .custom-note-trigger {
     transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
   }
-
-  .custom-note-trigger:active,
-  .custom-note-close:active,
-  .custom-note-nav:active:not(:disabled) {
+  .custom-note-trigger:active {
     transform: scale(0.97);
   }
-
   :global(body.custom-note-scroll-locked) {
     overflow: hidden;
     overscroll-behavior: none;
   }
-
   .custom-note-dialog {
-    width: min(860px, calc(100vw - 3rem));
+    width: min(640px, calc(100vw - 3rem));
     max-width: none;
     padding: 0;
     border: 0;
     background: transparent;
     overflow: visible;
   }
-
   .custom-note-dialog::backdrop {
     background: rgb(9 10 12 / 72%);
   }
-
   .custom-note-backdrop {
     position: fixed;
     inset: 0;
   }
-
   .custom-note-stack {
     position: relative;
     z-index: 1;
-    height: min(660px, calc(100dvh - 5rem));
+    height: min(780px, calc(100dvh - 5rem));
     perspective: 1400px;
     filter: drop-shadow(0 22px 28px rgb(0 0 0 / 28%));
     touch-action: pan-y;
   }
-
-  .custom-note-page {
-    opacity: 0;
-    position: absolute;
-    inset: 0;
-    transform: translate3d(0, 0, 0) rotate(0deg);
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    transition:
-      transform 560ms cubic-bezier(0.22, 0.75, 0.25, 1),
-      opacity 220ms ease;
-  }
-
-  .custom-note-page[data-depth="0"] {
-    z-index: 4;
-    opacity: 1;
-  }
-
-  .custom-note-page[data-depth="1"] {
-    z-index: 3;
-    transform: translate3d(0.65rem, 0.55rem, -20px) rotate(1.2deg);
-    opacity: 0.94;
-  }
-
-  .custom-note-page[data-depth="2"] {
-    z-index: 2;
-    transform: translate3d(1.15rem, 1rem, -40px) rotate(-1.3deg);
-    opacity: 0.88;
-  }
-
-  .custom-note-page[data-depth="3"] {
-    z-index: 1;
-    transform: translate3d(1.6rem, 1.35rem, -60px) rotate(1.8deg);
-    opacity: 0.8;
-  }
-
-  .custom-note-dialog[data-state="opening"] .custom-note-page {
-    transform: translate3d(0, 115vh, 120px) rotate(11deg);
-    opacity: 0;
-  }
-
-  .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth="1"] {
-    transition-delay: 60ms;
-  }
-
-  .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth="2"] {
-    transition-delay: 120ms;
-  }
-
-  .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth="3"] {
-    transition-delay: 180ms;
-  }
-
-  .custom-note-dialog[data-state="closing"] .custom-note-page {
-    transform: translate3d(0, 115vh, 120px) rotate(11deg);
-    opacity: 0;
-    transition:
-      transform 560ms cubic-bezier(0.42, 0, 1, 1),
-      opacity 420ms ease;
-  }
-
-  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="0"] {
-    z-index: 5;
-  }
-
-  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="1"] {
-    transition-delay: 60ms;
-  }
-
-  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="2"] {
-    transition-delay: 120ms;
-  }
-
-  .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth="3"] {
-    transition-delay: 180ms;
-  }
-
-  .custom-note-shape {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  .custom-note-content {
-    position: relative;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    max-width: 100%;
-    height: 100%;
-    padding: 4rem 3.5rem 3rem;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(0.75rem);
-  }
-
-  .custom-note-page[data-page-index="0"] .custom-note-content {
-    transition:
-      opacity 220ms ease 260ms,
-      transform 220ms ease 260ms;
-  }
-
-  .custom-note-dialog[data-state="open"]
-    .custom-note-page[data-page-index="0"]
-    .custom-note-content,
-  .custom-note-page[data-depth="0"]:not([data-page-index="0"])
-    .custom-note-content {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .custom-note-page:not([data-depth="0"]) .custom-note-content {
-    pointer-events: none;
-    opacity: 0;
-  }
-
-  .custom-note-page:not([data-depth="0"]) .custom-note-nav {
-    pointer-events: none;
-    opacity: 0;
-  }
-
-  .custom-note-page[data-depth="0"] .custom-note-content {
-    transition: none;
-  }
-
-  .custom-note-dialog[data-state="opening"]
-    .custom-note-page[data-page-index="0"]
-    .custom-note-content {
-    transition:
-      opacity 220ms ease 260ms,
-      transform 220ms ease 260ms;
-  }
-
-  .custom-note-close {
-    z-index: 2;
-    width: 44px;
-    height: 44px;
-    position: absolute;
-    top: clamp(1.5rem, 4vw, 2.5rem);
-    right: clamp(1.5rem, 4vw, 2.5rem);
-    border: 0;
-    background: transparent;
-    color: var(--color-black);
-    font: inherit;
-    font-size: 1.75rem;
-    cursor: pointer;
-  }
-
-  .custom-note-nav {
-    z-index: 5;
-    display: grid;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    place-items: center;
-    color: var(--color-black);
-    font: inherit;
-    cursor: pointer;
-    --drawably-stroke: var(--color-blue);
-    --drawably-fill: var(--color-paper);
-  }
-
-  .custom-note-footer {
-    flex-shrink: 0;
-    padding-block-start: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .custom-note-footer > div {
-    display: flex;
-    flex-shrink: 0;
-    gap: 0.75rem;
-  }
-
-  .custom-note-nav-icon {
-    width: 1.5rem;
-    height: 1.125rem;
-    overflow: visible;
-  }
-
-  .custom-note-nav:disabled {
-    cursor: wait;
-    opacity: 0.5;
-  }
-
-  .custom-note-status {
-    margin: 0.8rem 0 0;
-    color: var(--color-dark-gray);
-    font-size: 0.75rem;
-  }
-
-  .custom-note-kicker {
-    margin: 0 0 0.75rem;
-    color: var(--color-green);
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .custom-note-content h2 {
-    min-width: 0;
-    margin: 0 0 1.5rem;
-    font-size: clamp(1.4rem, 3vw, 1.85rem);
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .custom-note-body {
-    --scrollbar-track: #eee5d0;
-    --scrollbar-thumb: color-mix(in srgb, var(--color-paper) 80%, #eee5d0);
-    min-height: 0;
-    flex: 1;
-    min-width: 0;
-    overflow: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    font-size: 0.85rem;
-    line-height: 1.65;
-    overscroll-behavior: contain;
-    padding: 1rem;
-  }
-
-  @supports selector(::-webkit-scrollbar) {
-    .custom-note-body {
-      scrollbar-width: auto;
-      scrollbar-color: auto;
-    }
-
-    .custom-note-body::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-
-    .custom-note-body::-webkit-scrollbar-track {
-      background: var(--scrollbar-track);
-      border-radius: 12px;
-      margin-block: 0.5rem;
-    }
-
-    .custom-note-body::-webkit-scrollbar-thumb {
-      background: var(--scrollbar-thumb);
-      border: 2px solid var(--scrollbar-track);
-      border-radius: 12px;
-      min-height: 36px;
-    }
-
-    .custom-note-body::-webkit-scrollbar-thumb:hover,
-    .custom-note-body::-webkit-scrollbar-thumb:active {
-      background: var(--color-blue);
-    }
-
-    .custom-note-body::-webkit-scrollbar-corner {
-      background: transparent;
-    }
-  }
-
-  @media (forced-colors: active) {
-    .custom-note-body {
-      --scrollbar-track: Canvas;
-      --scrollbar-thumb: ButtonText;
-      scrollbar-color: auto;
-    }
-
-    .custom-note-body::-webkit-scrollbar-thumb:hover,
-    .custom-note-body::-webkit-scrollbar-thumb:active {
-      background: Highlight;
-    }
-  }
-
-  .scrapbook-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    grid-template-areas: "heading photos" "details photos";
-    column-gap: 0;
-    align-content: start;
-    isolation: isolate;
-  }
-
-  .custom-note-heading {
-    grid-area: heading;
-    padding-inline: 0.75rem;
-  }
-  .custom-note-details {
-    grid-area: details;
-    align-content: start;
-    position: relative;
-    isolation: isolate;
-  }
-
-  .scrapbook-layout .custom-note-details::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: -0.75rem 1.25rem 1.5rem -0.25rem;
-    background:
-      repeating-linear-gradient(
-        0deg,
-        transparent 0 17px,
-        rgb(103 85 58 / 12%) 17px 18px
-      ),
-      #d9cbb0;
-    transform: rotate(-4deg);
-    box-shadow: 1px 3px 6px rgb(67 49 24 / 10%);
-    pointer-events: none;
-  }
-
-  .scrapbook-photos {
-    grid-area: photos;
-    min-width: 0;
-    padding: 3.5rem 0.5rem 1rem;
-    align-self: start;
-    width: min(100%, 360px);
-    box-sizing: border-box;
-    justify-self: start;
-    margin-inline-start: -2rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  .scrapbook-photo {
-    position: relative;
-    margin: 0;
-    padding: 0.6rem 0.6rem 0.8rem;
-    background: #fffdf6;
-    box-shadow:
-      0 3px 6px rgb(55 44 24 / 12%),
-      0 12px 20px rgb(55 44 24 / 8%);
-    transform: rotate(4deg);
-  }
-
-  .scrapbook-photo::before {
-    content: "";
-    position: absolute;
-    z-index: 1;
-    width: 5rem;
-    height: 1.6rem;
-    inset-block-start: -0.7rem;
-    inset-inline-start: 35%;
-    background: repeating-linear-gradient(
-      90deg,
-      rgb(214 194 146 / 65%) 0 3px,
-      rgb(226 209 171 / 65%) 3px 6px
-    );
-    transform: rotate(5deg);
-    clip-path: polygon(2% 0, 98% 4%, 100% 92%, 0 100%);
-  }
-
-  .scrapbook-photo img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 8 / 5;
-    object-fit: contain;
-    background: #e5eadf;
-  }
-
-  .scrapbook-photo figcaption {
-    margin-block-start: 0.5rem;
-    font-size: 0.75rem;
-    color: #58604b;
-    letter-spacing: 0.04em;
-  }
-
-  .custom-note-details {
-    display: grid;
-    gap: 0;
-    padding: 0.25rem 0.75rem 1rem;
-  }
-
-  .scrapbook-note {
-    position: relative;
-    isolation: isolate;
-    padding: 1.5rem 4rem 2.5rem 1.5rem;
-    transform: rotate(-2deg);
-    filter: drop-shadow(1px 3px 2px rgb(67 49 24 / 12%));
-  }
-
-  .scrapbook-note::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: #e8d9b9;
-    clip-path: polygon(
-      1% 1%,
-      20% 0,
-      43% 1%,
-      68% 0,
-      99% 2%,
-      100% 25%,
-      99% 60%,
-      97% 87%,
-      91% 99%,
-      70% 97%,
-      48% 100%,
-      22% 98%,
-      0 100%,
-      1% 68%,
-      0 32%
-    );
-  }
-
-  .scrapbook-note::after {
-    content: "";
-    position: absolute;
-    width: 3.5rem;
-    height: 1rem;
-    inset-block-start: -0.5rem;
-    inset-inline-start: 1rem;
-    background: rgb(174 144 96 / 35%);
-    transform: rotate(-6deg);
-  }
-
-  .scrapbook-links {
-    position: relative;
-    z-index: 3;
-    display: grid;
-    gap: 0.6rem;
-    justify-self: end;
-    width: 78%;
-    margin-block-start: -1.25rem;
-    margin-inline-end: -1rem;
-    box-sizing: border-box;
-    padding: 1.25rem 1.5rem;
-    background-color: #eee4cd;
-    background-image:
-      linear-gradient(rgb(131 112 77 / 10%) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(131 112 77 / 10%) 1px, transparent 1px);
-    background-size: 13px 13px;
-    box-shadow: 1px 3px 4px rgb(67 49 24 / 12%);
-    transform: rotate(3deg);
-    font-size: 0.8rem;
-  }
-
-  .scrapbook-links::before {
-    content: "";
-    position: absolute;
-    width: 3rem;
-    height: 1.1rem;
-    inset-block-start: -0.45rem;
-    inset-inline-end: 0.75rem;
-    background: rgb(174 144 96 / 45%);
-    transform: rotate(-12deg);
-    pointer-events: none;
-  }
-
-  .scrapbook-label {
-    color: #64553c;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    margin-block-end: 0.15rem;
-  }
-
-  .custom-note-details p {
-    margin: 0;
-  }
-
   @media (max-width: 760px) {
     .custom-note-stack {
       height: min(780px, calc(100dvh - 4rem));
-    }
-
-    .custom-note-content {
-      padding: 3.5rem 1.25rem 2rem;
-    }
-
-    .scrapbook-layout {
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: auto;
-      grid-template-areas: "heading" "photos" "details";
-      gap: 0.65rem;
-      background: none;
-      font-size: 0.8125rem;
-      line-height: 1.55;
-    }
-
-    .scrapbook-photos {
-      width: min(100%, 280px, 38dvh);
-      box-sizing: border-box;
-      justify-self: center;
-      margin-inline-start: 0;
-    }
-
-    .custom-note-details {
-      gap: 0;
-      padding-inline: 0.25rem;
-      margin-block-start: -1.75rem;
-    }
-    .scrapbook-note {
-      padding: 2rem 1.1rem 2rem;
-    }
-    .scrapbook-links {
-      padding: 1rem;
-      gap: 0.4rem;
-      width: 85%;
-      margin-inline-end: 0;
-      margin-block-start: -0.75rem;
-    }
-    .scrapbook-photos {
-      padding-block: 0.75rem;
-    }
-    .custom-note-content h2 {
-      margin-block-end: 0;
-    }
-    .custom-note-close {
-      top: 1rem;
-      right: 1rem;
-    }
-
-    .custom-note-footer {
-      gap: 0.75rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .custom-note-page[data-depth],
-    .custom-note-dialog[data-state="opening"] .custom-note-page,
-    .custom-note-dialog[data-state="closing"] .custom-note-page {
-      transform: translate3d(0, 0, 0) rotate(0deg);
-    }
-
-    .custom-note-page {
-      transition: opacity 200ms ease;
-    }
-
-    .custom-note-content {
-      transform: none;
-      transition: opacity 200ms ease;
-    }
-
-    .custom-note-page[data-depth="0"] .custom-note-content {
-      transition: opacity 200ms ease;
-    }
-
-    .custom-note-page[data-page-index="0"] .custom-note-content,
-    .custom-note-dialog[data-state="opening"]
-      .custom-note-page[data-page-index="0"]
-      .custom-note-content {
-      transform: none;
-      transition: opacity 200ms ease;
-      transition-delay: 0ms;
-    }
-
-    .custom-note-dialog[data-state="closing"] .custom-note-page {
-      opacity: 0;
-      transition-delay: 0ms;
-    }
-
-    .custom-note-dialog[data-state="opening"] .custom-note-page {
-      opacity: 0;
-      transition-delay: 0ms;
-    }
-
-    .custom-note-dialog[data-state="opening"] .custom-note-page[data-depth],
-    .custom-note-dialog[data-state="closing"] .custom-note-page[data-depth] {
-      transition: opacity 200ms ease;
-      transition-delay: 0ms;
     }
   }
 </style>

@@ -1,0 +1,219 @@
+---
+import ExternalLink from "./ui/ExternalLink.astro";
+interface Props {
+  project: {
+    title: string;
+    description: string;
+    image: string;
+    repository?: string;
+    demo?: string;
+  };
+}
+const { project } = Astro.props;
+---
+
+<div class="scrapbook-layout">
+  <header class="custom-note-heading">
+    <p class="custom-note-kicker">{project.title}</p>
+  </header>
+  <div class="scrapbook-photos">
+    <figure class="scrapbook-photo">
+      <img
+        src={project.image}
+        alt={project.title + " overview screenshot"}
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  </div>
+  <div class="custom-note-details">
+    <div class="scrapbook-note"><p>{project.description}</p></div>
+    <div class="scrapbook-links">
+      {
+        project.repository ? (
+          <ExternalLink href={project.repository} underline>
+            Repository
+          </ExternalLink>
+        ) : (
+          <p>Private repository</p>
+        )
+      }
+      {
+        project.demo ? (
+          <ExternalLink href={project.demo} underline>
+            Live demo
+          </ExternalLink>
+        ) : (
+          <p>Demo coming soon</p>
+        )
+      }
+    </div>
+  </div>
+</div>
+<style>
+  .custom-note-kicker {
+    margin: 0 0 0.75rem;
+    color: var(--color-green);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .scrapbook-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    isolation: isolate;
+  }
+
+  .custom-note-heading {
+    padding-inline: 0.75rem;
+  }
+  .custom-note-details {
+    align-content: start;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .scrapbook-photos {
+    min-width: 0;
+    padding: 0 0.5rem;
+    align-self: center;
+    width: min(100%, 360px);
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+  }
+
+  .scrapbook-photo {
+    position: relative;
+    margin: 0;
+    padding: 0.6rem 0.6rem 0.8rem;
+    background: #fffdf6;
+    box-shadow:
+      0 3px 6px rgb(55 44 24 / 12%),
+      0 12px 20px rgb(55 44 24 / 8%);
+    transform: rotate(1deg);
+  }
+
+  .scrapbook-photo::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    width: 5rem;
+    height: 1.6rem;
+    inset-block-start: -0.7rem;
+    inset-inline-start: 35%;
+    background: repeating-linear-gradient(
+      90deg,
+      rgb(214 194 146 / 65%) 0 3px,
+      rgb(226 209 171 / 65%) 3px 6px
+    );
+    transform: rotate(5deg);
+    clip-path: polygon(2% 0, 98% 4%, 100% 92%, 0 100%);
+  }
+
+  .scrapbook-photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 8 / 5;
+    object-fit: contain;
+    background: #e5eadf;
+  }
+
+  .custom-note-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 0.25rem 0.75rem 1rem;
+  }
+
+  .scrapbook-note {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    padding: 1.25rem 1.5rem;
+    background-color: #eee4cd;
+    background-image:
+      linear-gradient(rgb(131 112 77 / 10%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(131 112 77 / 10%) 1px, transparent 1px);
+    background-size: 13px 13px;
+    box-shadow: 1px 3px 4px rgb(67 49 24 / 12%);
+  }
+  .scrapbook-note::before {
+    content: "";
+    position: absolute;
+    width: 3rem;
+    height: 1.1rem;
+    inset-block-start: -0.45rem;
+    inset-inline-end: 0.75rem;
+    background: rgb(174 144 96 / 45%);
+    transform: rotate(-12deg);
+    pointer-events: none;
+  }
+  .scrapbook-links {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 0 0 9rem;
+    padding: 1rem;
+    background: #e8d9b9;
+    box-shadow: 1px 3px 4px rgb(67 49 24 / 12%);
+    font-size: 0.8rem;
+    color: var(--color-dark-gray);
+  }
+
+  .scrapbook-links::before {
+    content: "";
+    position: absolute;
+    width: 3rem;
+    height: 1.1rem;
+    top: -0.5rem;
+    left: calc(50% - 1.5rem);
+    background: rgb(174 144 96 / 45%);
+    transform: rotate(8deg);
+    clip-path: polygon(2% 0, 98% 4%, 100% 92%, 0 100%);
+    pointer-events: none;
+  }
+
+  .custom-note-details p {
+    margin: 0;
+  }
+
+  .scrapbook-layout {
+    padding: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 760px) {
+    .scrapbook-layout {
+      gap: 1.25rem;
+      padding: 0.75rem;
+      font-size: 0.8125rem;
+      line-height: 1.55;
+    }
+    .custom-note-details {
+      padding-inline: 0;
+    }
+    .scrapbook-photos {
+      width: min(100%, 280px, 38dvh);
+    }
+    .scrapbook-note {
+      padding: 1rem;
+    }
+  }
+  @media (max-width: 480px) {
+    .custom-note-details {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .scrapbook-links {
+      flex: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  }
+</style>

@@ -4,6 +4,8 @@ import "drawably/font.css";
 import { getEntry, getCollection } from "astro:content";
 import ProfileCard from "./ProfileCard.astro";
 import PaperNoteCustomDialog from "./PaperNoteCustomDialog.astro";
+import PaperNotePage from "./PaperNotePage.astro";
+import ProjectNoteContent from "./ProjectNoteContent.astro";
 import SketchButton from "./ui/SketchButton.astro";
 import FeaturedProjects from "./FeaturedProjects.astro";
 import SketchDivider from "./ui/SketchDivider.astro";
@@ -104,31 +106,14 @@ const featuredProjects = projects
     <PaperNoteCustomDialog
       id="project-notes"
       itemLabel="Project"
-      pages={projects.map((project) => ({
-        kicker: project.title,
-        title: project.title,
-        body: project.description ?? "",
-        images: [
-          {
-            src: project.image,
-            alt: `${project.title} overview screenshot`,
-            caption: "01 / The overview",
-          },
-        ],
-        links: [
-          {
-            href: project.repository,
-            label: project.repository
-              ? "View repository"
-              : "Private repository",
-          },
-          {
-            href: project.demo,
-            label: project.demo ? "Visit live demo" : "Demo coming soon",
-          },
-        ],
-      }))}
-    />
+      title="Projects"
+    >
+      {projects.map((project) => (
+        <PaperNotePage label={project.title} itemLabel="Project">
+          <ProjectNoteContent project={project} />
+        </PaperNotePage>
+      ))}
+    </PaperNoteCustomDialog>
   )
 }
 
@@ -141,10 +126,10 @@ const featuredProjects = projects
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    })
+    }),
   );
   initializeSketches("[data-drawably-badge]", (el) =>
-    drawablyBadge(el, { roughness: 0.8, boil: 0.2, variant: "outline" })
+    drawablyBadge(el, { roughness: 0.8, boil: 0.2, variant: "outline" }),
   );
 </script>
 
