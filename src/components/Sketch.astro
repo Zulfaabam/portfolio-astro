@@ -58,7 +58,7 @@ const featuredProjects = projects
 
     <main class="content">
       <section class="intro">
-        <span class="drawably-badge" data-drawably-badge>HELLO</span>
+        <span class="drawably-highlight" data-drawably-highlight>HELLO</span>
         <h1>I'm Abam!</h1>
         <p>{homeContent?.data?.intro}</p>
       </section>
@@ -118,7 +118,7 @@ const featuredProjects = projects
 }
 
 <script>
-  import { drawablyBadge, drawablyCard } from "drawably";
+  import { drawablyHighlight, drawablyCard } from "drawably";
   import { initializeSketches } from "./ui/initializeSketches";
 
   initializeSketches("[data-drawably-card]", (el) =>
@@ -128,8 +128,8 @@ const featuredProjects = projects
       fill: "#2724d1",
     }),
   );
-  initializeSketches("[data-drawably-badge]", (el) =>
-    drawablyBadge(el, { roughness: 0.8, boil: 0.2, variant: "outline" }),
+  initializeSketches("[data-drawably-highlight]", (el) =>
+    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 }),
   );
 </script>
 
@@ -168,7 +168,7 @@ const featuredProjects = projects
     display: grid;
     gap: 1rem;
   }
-  .drawably-badge {
+  .drawably-highlight {
     width: max-content;
     padding: 0.2rem 0.55rem;
     color: var(--color-black);
