@@ -6,6 +6,7 @@ interface Props extends HTMLAttributes<"button"> {
   variant?: "solid" | "outline";
   size?: "small" | "default" | "large";
   fullWidth?: boolean;
+  roughness?: number;
 }
 
 const {
@@ -14,6 +15,7 @@ const {
   fullWidth = false,
   type = "button",
   class: className,
+  roughness = 0.8,
   ...attributes
 } = Astro.props;
 ---
@@ -29,6 +31,7 @@ const {
     className,
   ]}
   data-sketch-button={variant}
+  data-roughness={roughness}
 >
   <slot />
 </button>
@@ -39,7 +42,7 @@ const {
 
   initializeSketches<HTMLButtonElement>("[data-sketch-button]", (el) =>
     drawablyButton(el, {
-      roughness: 0.8,
+      roughness: el.dataset.roughness ? parseFloat(el.dataset.roughness) : 0.8,
       boil: 0.2,
       variant: el.dataset.sketchButton === "outline" ? "outline" : "solid",
     })

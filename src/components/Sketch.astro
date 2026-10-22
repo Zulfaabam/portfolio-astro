@@ -92,6 +92,7 @@ const featuredProjects = projects
               aria-controls="project-notes"
               disabled={projects.length === 0}
               size="small"
+              roughness={0.6}
             >
               Load more
             </SketchButton>
@@ -126,10 +127,10 @@ const featuredProjects = projects
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    }),
+    })
   );
   initializeSketches("[data-drawably-highlight]", (el) =>
-    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 }),
+    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 })
   );
 </script>
 
