@@ -68,7 +68,7 @@ const featuredProjects = projects
           <h3><span>Journey</span></h3>
           <ul class="drawably-list" data-drawably-list>
             {
-              miniJourneys.map((journey, index) => (
+              miniJourneys.map((journey) => (
                 <li>
                   <span class="number job-year">{journey.year}</span>
                   <span>{journey.job}</span>
@@ -206,10 +206,6 @@ const featuredProjects = projects
     color: var(--color-black);
     font-size: 1.1rem;
   }
-  .arrow,
-  .project-arrow {
-    color: var(--color-green);
-  }
   .drawably-list {
     margin: 0;
     padding: 0;
@@ -222,7 +218,6 @@ const featuredProjects = projects
     gap: 0.8rem;
     align-items: center;
     padding: 1rem 0 0.75rem 0;
-    /* border-bottom: 1px solid var(--color-gray); */
     color: var(--color-black);
     font-size: 0.875rem;
     list-style: none;
