@@ -1,7 +1,7 @@
 ---
-intro: "I was born and live in Semarang, Indonesia. Currently a Software Engineer Intern @ Formulatrix.\n
+intro: "I was born and live in Semarang, Indonesia. Previously a Software Engineer Intern @ Formulatrix.\n
 \n
-In the last 3 years or so, I mostly work as a Frontend Developer building production-grade web applications using React, Next.js, and TypeScript. I am always seeking new opportunities, try to learn new things, and make sure I still enjoy to code & read the code. Now focusing on my internship with the amazing Rock Imager® Team @ Formulatrix Indonesia."
+In the last 3 years or so, I mostly work as a Frontend Developer building production-grade web applications using React, Next.js, and TypeScript. Now exploring the Full-stack path after my internship with the amazing Rock Imager® Team @ Formulatrix Indonesia. I am always seeking new opportunities, try to learn new things, and I am still in a joy to code & read the code."
 
 miniJourneys:
   - id: 1
@@ -15,28 +15,35 @@ miniJourneys:
   - id: 3
     job: "Software Engineer Intern @ Formulatrix"
     place: "Semarang, Indonesia"
-    year: "Now"
+    year: "2026"
 
 featuredProjects:
   - id: 1
+    title: "LunchSpot"
+    description: "LunchSpot is an intelligent canteen monitoring system that leverages computer vision to determine table availability in real-time."
+    repository: ""
+    demo: ""
+    thumbnail: ""
+    status: "Done"
+  - id: 2
     title: "PokePinpoint"
     description: "PokePinpoint is a fun and challenging Pokémon guessing game where players use generated clues to identify a mystery Pokémon."
     repository: ""
     demo: "https://pokepinpoint.netlify.app/"
     thumbnail: ""
     status: "On Progress"
-  - id: 2
+  - id: 3
     title: "Lelang Elektronik JBA"
     description: "An auction platform by JBA Indonesia."
     repository: ""
     demo: "https://lelang.jba.co.id/"
     thumbnail: ""
     status: "Done"
-  - id: 3
-    title: "VISION"
-    description: "A content management system for JBA Indonesia to manage auction data, customers, and analytics."
-    repository: ""
-    demo: ""
-    thumbnail: ""
-    status: "Done"
+  # - id: 3
+  #   title: "VISION"
+  #   description: "A content management system for JBA Indonesia to manage auction data, customers, and analytics."
+  #   repository: ""
+  #   demo: ""
+  #   thumbnail: ""
+  #   status: "Done"
 ---
