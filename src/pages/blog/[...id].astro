@@ -1,0 +1,84 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
+import WritingLayout from "../../layouts/WritingLayout.astro";
+import { getPublishedPosts, formatPostDate, readingTime } from "../../lib/blog";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const contents = headings.filter(({ depth }) => depth === 2 || depth === 3);
+---
+
+<WritingLayout title={post.data.title} description={post.data.description}>
+  <a class="writing-back" href="/blog">← All notes & stories</a>
+  <div class:list={["writing-detail", { "has-contents": contents.length > 0 }]}>
+    {
+      contents.length > 0 && (
+        <aside class="writing-contents">
+          <nav aria-label="On this page">
+            <h2>On this page</h2>
+            <ol>
+              {contents.map(({ depth, slug, text }) => (
+                <li class:list={{ "is-subheading": depth === 3 }}>
+                  <a href={`#${slug}`}>{text}</a>
+                </li>
+              ))}
+            </ol>
+            <a class="writing-top" href="#writing-content">
+              Back to top ↑
+            </a>
+          </nav>
+        </aside>
+      )
+    }
+    <article class="writing-paper">
+      <header class="writing-article-header">
+        <div class="writing-meta">
+          <span class="writing-category">{post.data.category}</span>
+          <time datetime={post.data.published.toISOString()}
+            >{formatPostDate(post.data.published)}</time
+          >
+          <span>{readingTime(post.body)} min read</span>
+        </div>
+        <h1>{post.data.title}</h1>
+        <p class="writing-deck">{post.data.description}</p>
+        <div class="writing-byline">
+          By Abam {
+            post.data.updated && (
+              <span>
+                {" "}
+                · Updated{" "}
+                <time datetime={post.data.updated.toISOString()}>
+                  {formatPostDate(post.data.updated)}
+                </time>
+              </span>
+            )
+          }
+        </div>
+        {
+          post.data.tags.length > 0 && (
+            <ul class="writing-tags" aria-label="Tags">
+              {post.data.tags.map((tag) => (
+                <li>#{tag}</li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+      <div class="writing-prose"><Content /></div>
+      <footer class="writing-article-footer">
+        <span>Thanks for reading.</span><a href="/blog"
+          >More notes & stories →</a
+        >
+      </footer>
+    </article>
+  </div>
+</WritingLayout>

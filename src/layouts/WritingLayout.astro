@@ -1,0 +1,20 @@
+---
+import "drawably/font.css";
+import Layout from "./Layout.astro";
+import "../styles/writing.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+---
+
+<Layout title={`${title} · Abams`} description={description}>
+  <a slot="before-nav" class="writing-skip" href="#writing-content"
+    >Skip to content</a
+  >
+  <main id="writing-content" class="writing-shell" tabindex="-1">
+    <slot />
+  </main>
+</Layout>

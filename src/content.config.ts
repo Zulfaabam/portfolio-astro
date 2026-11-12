@@ -69,13 +69,16 @@ const journey = defineCollection({
 });
 
 const blog = defineCollection({
-  // loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
+  loader: glob({ base: "./src/content/blog", pattern: "**/*.md" }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
     published: z.coerce.date(),
-
-    tags: z.array(z.string()),
+    updated: z.coerce.date().optional(),
+    category: z
+      .enum(["Project", "Learning", "Story", "Writing"])
+      .default("Writing"),
+    tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
   }),
 });

@@ -3,6 +3,7 @@ import "drawably/style.css";
 import type { HTMLAttributes } from "astro/types";
 
 interface Props extends HTMLAttributes<"button"> {
+  href?: string;
   variant?: "solid" | "outline";
   size?: "small" | "default" | "large";
   fullWidth?: boolean;
@@ -16,13 +17,16 @@ const {
   type = "button",
   class: className,
   roughness = 0.8,
+  href,
   ...attributes
 } = Astro.props;
+const Tag = href ? "a" : "button";
 ---
 
-<button
+<Tag
   {...attributes}
-  type={type}
+  type={href ? undefined : type}
+  href={href}
   class:list={[
     "drawably-button",
     `sketch-button-${variant}`,
@@ -34,18 +38,22 @@ const {
   data-roughness={roughness}
 >
   <slot />
-</button>
+</Tag>
 
 <script>
   import { drawablyButton } from "drawably";
   import { initializeSketches } from "./initializeSketches";
 
-  initializeSketches<HTMLButtonElement>("[data-sketch-button]", (el) =>
-    drawablyButton(el, {
-      roughness: el.dataset.roughness ? parseFloat(el.dataset.roughness) : 0.8,
-      boil: 0.2,
-      variant: el.dataset.sketchButton === "outline" ? "outline" : "solid",
-    })
+  initializeSketches<HTMLButtonElement | HTMLAnchorElement>(
+    "[data-sketch-button]",
+    (el) =>
+      drawablyButton(el, {
+        roughness: el.dataset.roughness
+          ? parseFloat(el.dataset.roughness)
+          : 0.8,
+        boil: 0.2,
+        variant: el.dataset.sketchButton === "outline" ? "outline" : "solid",
+      }),
   );
 </script>
 
