@@ -4,7 +4,6 @@ import "drawably/font.css";
 import { getEntry, getCollection } from "astro:content";
 import ProfileCard from "./ProfileCard.astro";
 import PaperNoteCustomDialog from "./PaperNoteCustomDialog.astro";
-import PaperNotePage from "./PaperNotePage.astro";
 import ProjectNoteContent from "./ProjectNoteContent.astro";
 import SketchButton from "./ui/SketchButton.astro";
 import FeaturedProjects from "./FeaturedProjects.astro";
@@ -108,12 +107,9 @@ const featuredProjects = projects
       id="project-notes"
       itemLabel="Project"
       title="Projects"
+      pages={projects.map(({ id, title }) => ({ id, label: title }))}
     >
-      {projects.map((project) => (
-        <PaperNotePage label={project.title} itemLabel="Project">
-          <ProjectNoteContent project={project} />
-        </PaperNotePage>
-      ))}
+      {(index: number) => <ProjectNoteContent project={projects[index]} />}
     </PaperNoteCustomDialog>
   )
 }
@@ -127,10 +123,10 @@ const featuredProjects = projects
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    })
+    }),
   );
   initializeSketches("[data-drawably-highlight]", (el) =>
-    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 })
+    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 }),
   );
 </script>
 
