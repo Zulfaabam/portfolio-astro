@@ -8,6 +8,12 @@ import ProjectNoteContent from "./ProjectNoteContent.astro";
 import SketchButton from "./ui/SketchButton.astro";
 import FeaturedProjects from "./FeaturedProjects.astro";
 import SketchDivider from "./ui/SketchDivider.astro";
+import {
+  getPublishedPosts,
+  formatPostDate,
+  postUrl,
+  readingTime,
+} from "../lib/blog";
 
 const homeContent = await getEntry("home", "home");
 const miniJourneys =
@@ -32,6 +38,7 @@ const projects = (await getCollection("projects"))
 const featuredProjects = projects
   .filter((project) => project.featured)
   .slice(0, 3);
+const latestPosts = (await getPublishedPosts()).slice(0, 3);
 ---
 
 <div class="sketch-page">
@@ -79,6 +86,45 @@ const featuredProjects = projects
           </ul>
         </div>
 
+        <div class="chapter" aria-labelledby="home-blog-heading">
+          <h2 id="home-blog-heading"><span>Blog</span></h2>
+          {
+            latestPosts.length > 0 ? (
+              <ul class="drawably-list home-blog-list">
+                {latestPosts.map((post) => (
+                  <li>
+                    <time
+                      class="number"
+                      datetime={post.data.published.toISOString()}
+                    >
+                      {formatPostDate(post.data.published)}
+                    </time>
+                    <a class="home-blog-title" href={postUrl(post.id)}>
+                      {post.data.title}
+                    </a>
+                    <small>{readingTime(post.body)} min read</small>
+                    <SketchDivider class="row-divider" />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="home-blog-empty">
+                New notes and stories are on their way.
+              </p>
+            )
+          }
+          <div class="load-more-btn">
+            <SketchButton
+              href="/blog"
+              variant="outline"
+              size="small"
+              roughness={0.6}
+            >
+              See more
+            </SketchButton>
+          </div>
+        </div>
+
         <div class="chapter">
           <h3><span>Projects</span></h3>
           <FeaturedProjects projects={featuredProjects} />
@@ -123,10 +169,10 @@ const featuredProjects = projects
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    }),
+    })
   );
   initializeSketches("[data-drawably-highlight]", (el) =>
-    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 }),
+    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 })
   );
 </script>
 
@@ -194,7 +240,8 @@ const featuredProjects = projects
     display: grid;
     gap: 0.8rem;
   }
-  .chapter h3 {
+  .chapter h3,
+  .chapter h2 {
     margin: 0;
     display: flex;
     gap: 0.4rem;
@@ -245,6 +292,28 @@ const featuredProjects = projects
 
   .load-more-btn {
     margin-left: auto;
+  }
+  .home-blog-title {
+    min-width: 0;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .home-blog-title:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .home-blog-title:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 4px;
+  }
+  .home-blog-list time,
+  .home-blog-list small {
+    white-space: nowrap;
+  }
+  .home-blog-empty {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
   @media (max-width: 860px) {

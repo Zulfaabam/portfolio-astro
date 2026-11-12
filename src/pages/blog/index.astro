@@ -1,0 +1,86 @@
+---
+import WritingLayout from "../../layouts/WritingLayout.astro";
+import SketchDivider from "../../components/ui/SketchDivider.astro";
+import {
+  getPublishedPosts,
+  formatPostDate,
+  postUrl,
+  readingTime,
+} from "../../lib/blog";
+
+const posts = await getPublishedPosts();
+---
+
+<WritingLayout
+  title="Notes & stories"
+  description="Project deep dives, lessons along the way, and stories from work. A notebook by Abam."
+>
+  <a class="writing-back" href="/">← Back to the portfolio</a>
+  <header class="writing-intro">
+    <h1>Notes <span>&</span> stories.</h1>
+    <p>The things I build, the things I learn, and the stories in between.</p>
+  </header>
+  <section aria-labelledby="entries-heading" class="writing-entries">
+    <div class="writing-section-label">
+      <h2 id="entries-heading">All entries</h2>
+      <span>{posts.length} {posts.length === 1 ? "entry" : "entries"}</span>
+    </div>
+    {
+      posts.length > 0 ? (
+        <ol class="writing-list">
+          {posts.map((post) => (
+            <li>
+              <article class="writing-entry">
+                <time
+                  class="writing-entry-date"
+                  datetime={post.data.published.toISOString()}
+                >
+                  {formatPostDate(post.data.published)}
+                </time>
+                <div class="writing-entry-content">
+                  <h2>
+                    <a href={postUrl(post.id)}>
+                      {post.data.title}
+                      <span aria-hidden="true"> →</span>
+                    </a>
+                  </h2>
+                  <p>{post.data.description}</p>
+                  <div class="writing-entry-details">
+                    {/* <span class="writing-entry-category">
+                      {post.data.category}
+                    </span> */}
+                    {/* {post.data.tags.length > 0 && (
+                      <ul class="writing-tags" aria-label="Tags">
+                        {post.data.tags.map((tag) => (
+                          <li>#{tag}</li>
+                        ))}
+                      </ul>
+                    )} */}
+                  </div>
+                </div>
+                <span class="writing-entry-time">
+                  {readingTime(post.body)} min read
+                </span>
+              </article>
+              <SketchDivider />
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <div class="writing-empty">
+          <>
+            <h3>A fresh page.</h3>
+            <p>
+              New projects, lessons, and stories will find a home here soon.
+            </p>
+          </>
+        </div>
+      )
+    }
+  </section>
+  <footer class="writing-footer">
+    More from the archive? <a href="https://abams.hashnode.dev/">
+      Read my earlier writing ↗
+    </a>
+  </footer>
+</WritingLayout>

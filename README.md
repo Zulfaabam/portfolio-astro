@@ -1,5 +1,9 @@
 # Astro Starter Kit: Basics
 
+## Writing and project stories
+
+The blog lives at `/blog`. Add Markdown files to `src/content/blog/` to create individual article pages. See [the writing guide](docs/writing.md) for frontmatter, drafts, images, and examples.
+
 ```sh
 pnpm create astro@latest -- --template basics
 ```
