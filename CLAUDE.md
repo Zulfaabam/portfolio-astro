@@ -8,6 +8,10 @@ astro dev --background
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
+Never validate with build command unless explicitly instructed.
+
+Never run dev or run with browser to check the changes unless explicitly instructed.
+
 ## Documentation
 
 Full documentation: https://docs.astro.build

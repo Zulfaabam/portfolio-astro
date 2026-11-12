@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import { render } from "astro:content";
 import WritingLayout from "../../layouts/WritingLayout.astro";
+import SketchArrow from "../../components/ui/SketchArrow";
 import { getPublishedPosts, formatPostDate, readingTime } from "../../lib/blog";
 
 export async function getStaticPaths() {
@@ -18,7 +19,9 @@ const contents = headings.filter(({ depth }) => depth === 2 || depth === 3);
 ---
 
 <WritingLayout title={post.data.title} description={post.data.description}>
-  <a class="writing-back" href="/blog">← All notes & stories</a>
+  <a class="writing-back" href="/blog"
+    ><SketchArrow direction="left" /> All notes & stories</a
+  >
   <div class:list={["writing-detail", { "has-contents": contents.length > 0 }]}>
     {
       contents.length > 0 && (
@@ -33,7 +36,7 @@ const contents = headings.filter(({ depth }) => depth === 2 || depth === 3);
               ))}
             </ol>
             <a class="writing-top" href="#writing-content">
-              Back to top ↑
+              Back to top <SketchArrow direction="up" />
             </a>
           </nav>
         </aside>
@@ -76,7 +79,7 @@ const contents = headings.filter(({ depth }) => depth === 2 || depth === 3);
       <div class="writing-prose"><Content /></div>
       <footer class="writing-article-footer">
         <span>Thanks for reading.</span><a href="/blog"
-          >More notes & stories →</a
+          >More notes & stories <SketchArrow /></a
         >
       </footer>
     </article>

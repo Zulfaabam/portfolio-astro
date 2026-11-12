@@ -1,5 +1,6 @@
 ---
 import type { HTMLAttributes } from "astro/types";
+import SketchArrow from "./SketchArrow";
 
 interface Props extends Omit<HTMLAttributes<"a">, "target" | "rel"> {
   href: string;
@@ -13,7 +14,7 @@ const { underline = false, class: className, ...attributes } = Astro.props;
   {...attributes}
   class:list={["external-link", { "always-underlined": underline }, className]}
   target="_blank"
-  rel="noopener noreferrer"><slot /> <span aria-hidden="true">↗</span></a
+  rel="noopener noreferrer"><slot /> <SketchArrow direction="up-right" /></a
 >
 
 <style>

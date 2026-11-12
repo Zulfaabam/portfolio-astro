@@ -1,6 +1,7 @@
 import { useMemo, type Ref } from "react";
-import { roughArrow, roughRoundedRect, scribbleFill } from "drawably";
+import { roughRoundedRect, scribbleFill } from "drawably";
 import { DrawablyButton } from "drawably/react";
+import SketchArrow from "./ui/SketchArrow";
 
 interface Props {
   id: string;
@@ -42,8 +43,6 @@ export default function PaperNotePage({
     return {
       outline: roughRoundedRect(5, 20, 430, 520, 18, options),
       texture: scribbleFill(17, 32, 406, 496, options),
-      previous: roughArrow(25, 12, 7, 12, options),
-      next: roughArrow(7, 12, 25, 12, options),
     };
   }, [seed]);
 
@@ -119,20 +118,12 @@ export default function PaperNotePage({
                   boil={0.2}
                   onClick={() => onChangePage(direction)}
                 >
-                  <svg
+                  <SketchArrow
                     className="custom-note-nav-icon"
-                    viewBox="0 0 32 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d={paths[name]}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                    direction={direction === -1 ? "left" : "right"}
+                    size="1.5rem"
+                    seed={seed}
+                  />
                 </DrawablyButton>
               );
             })}

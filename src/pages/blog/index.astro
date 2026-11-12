@@ -1,6 +1,7 @@
 ---
 import WritingLayout from "../../layouts/WritingLayout.astro";
 import SketchDivider from "../../components/ui/SketchDivider.astro";
+import SketchArrow from "../../components/ui/SketchArrow";
 import {
   getPublishedPosts,
   formatPostDate,
@@ -15,16 +16,16 @@ const posts = await getPublishedPosts();
   title="Notes & stories"
   description="Project deep dives, lessons along the way, and stories from work. A notebook by Abam."
 >
-  <a class="writing-back" href="/">← Back to the portfolio</a>
+  <a class="writing-back" href="/"><SketchArrow direction="left" /> Home</a>
   <header class="writing-intro">
     <h1>Notes <span>&</span> stories.</h1>
     <p>The things I build, the things I learn, and the stories in between.</p>
   </header>
   <section aria-labelledby="entries-heading" class="writing-entries">
-    <div class="writing-section-label">
+    <!-- <div class="writing-section-label">
       <h2 id="entries-heading">All entries</h2>
       <span>{posts.length} {posts.length === 1 ? "entry" : "entries"}</span>
-    </div>
+    </div> -->
     {
       posts.length > 0 ? (
         <ol class="writing-list">
@@ -41,7 +42,10 @@ const posts = await getPublishedPosts();
                   <h2>
                     <a href={postUrl(post.id)}>
                       {post.data.title}
-                      <span aria-hidden="true"> →</span>
+                      <span aria-hidden="true">
+                        {" "}
+                        <SketchArrow />
+                      </span>
                     </a>
                   </h2>
                   <p>{post.data.description}</p>
@@ -78,9 +82,9 @@ const posts = await getPublishedPosts();
       )
     }
   </section>
-  <footer class="writing-footer">
+  <!-- <footer class="writing-footer">
     More from the archive? <a href="https://abams.hashnode.dev/">
-      Read my earlier writing ↗
+      Read my earlier writing <SketchArrow direction="up-right" />
     </a>
-  </footer>
+  </footer> -->
 </WritingLayout>
