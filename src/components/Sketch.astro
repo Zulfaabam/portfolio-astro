@@ -9,6 +9,7 @@ import SketchButton from "./ui/SketchButton.astro";
 import FeaturedProjects from "./FeaturedProjects.astro";
 import SketchDivider from "./ui/SketchDivider.astro";
 import JourneyAccordion from "./JourneyAccordion.astro";
+import resumeUrl from "../assets/Zulfa_Fatah_Akbar_Ahmad_CV.pdf?url";
 import {
   getPublishedPosts,
   formatPostDate,
@@ -54,7 +55,11 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3);
             aria-controls="project-notes"
             disabled={projects.length === 0}>View My Projects</SketchButton
           >
-          <SketchButton variant="outline" fullWidth
+          <SketchButton
+            href={resumeUrl}
+            download="Zulfa_Fatah_Akbar_Ahmad_CV.pdf"
+            variant="outline"
+            fullWidth
             >Download Resume</SketchButton
           >
         </div>
@@ -157,10 +162,10 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3);
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    }),
+    })
   );
   initializeSketches("[data-drawably-highlight]", (el) =>
-    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 }),
+    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 })
   );
 </script>
 

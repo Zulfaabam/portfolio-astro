@@ -1,6 +1,8 @@
 # TODO
 
-- [ ] New Journey content
+- [x] New Journey content
 - [ ] New Project content
-- [ ] Blog
-- [ ] New CV
+- [x] Blog page
+- [x] New CV
+- [ ] Integrate blog from hashnode
+- [ ] Project story telling

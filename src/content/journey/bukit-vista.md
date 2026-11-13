@@ -18,11 +18,13 @@ technologies:
   - GitHub
   - Trello
 
-summary: "Learned React best practices while refactoring internal features and improving state management in BIGRR. Refactored and stabilized BIGRR by applying modern React practices and improving the maintainability of core features. Maintained BIGRR and shipped tooling and UI work across internal systems, AI debugging support, and property platform experiences."
+summary: "First joined Bukit Vista as an intern in February 2022 while still in college. Continued my journey as a part-timer in mid 2022 until I graduated from Computer Engineering at Diponegoro University. Then I become a fulltime frontend developer, maintaining Bukit Vista's internal apps."
 ---
 
-## Responsibilities
+## Achievements
 
-- Maintained BIGRR, Bukit Vista’s internal app for property management, booking calendars, and finance.
-- Built Tinker, a debugging tool for the company AI called Gaia.
-- Contributed to the BVGO app using Flutter and the Bukit Vista website using WordPress.
+- Designed and developed web application interfaces using React, Redux, Context API, Material UI, and TailwindCSS for an internal platform managing 100+ properties.
+- Fixed critical bugs, optimized rendering logic and initial load.
+- Conducted code reviews and mentored 2 interns to maintain code quality and best practices.
+- Deployed features to production, collaborating closely with backend, design, and product teams.
+- Contributed to a WordPress (PHP) website and a small Flutter mobile application.

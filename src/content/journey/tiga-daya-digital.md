@@ -16,11 +16,11 @@ technologies:
   - BitBucket
   - Jira
 
-summary: "Built and maintained the JBA Indonesia electronic auction platform and internal content management tools."
+summary: "Worked at JBA Indonesia as a frontend developer to build the JBA Indonesia electronic auction platform and the internal content management tools."
 ---
 
-## Responsibilities
+## Achievements
 
-- Built JBA Indonesia’s electronic auction platform.
-- Developed JAVIS, the internal content management app for auction operations.
-- Designed VISION, the next-generation internal app for managing auction content.
+- Developed and maintained core features of an online auction platform for JBA Indonesia (lelang.jba.co.id) using React, Next.js, TypeScript, Socket.io, TailwindCSS, and Zustand, supporting real-time bidding for 50+ concurrent bidders at peak.
+- Built VISION, an admin dashboard with modular-monolith architecture, complex data tables, real-time data handling, and full CRUD; created and documented 10+ modular components in Storybook.
+- Integrated 20+ REST API endpoints with efficient data fetching, caching, and error handling.

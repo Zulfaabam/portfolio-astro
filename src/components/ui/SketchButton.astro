@@ -4,6 +4,7 @@ import type { HTMLAttributes } from "astro/types";
 
 interface Props extends HTMLAttributes<"button"> {
   href?: string;
+  download?: HTMLAttributes<"a">["download"];
   variant?: "solid" | "outline";
   size?: "small" | "default" | "large";
   fullWidth?: boolean;
