@@ -22,10 +22,6 @@ const posts = await getPublishedPosts();
     <p>The things I build, the things I learn, and the stories in between.</p>
   </header>
   <section aria-labelledby="entries-heading" class="writing-entries">
-    <!-- <div class="writing-section-label">
-      <h2 id="entries-heading">All entries</h2>
-      <span>{posts.length} {posts.length === 1 ? "entry" : "entries"}</span>
-    </div> -->
     {
       posts.length > 0 ? (
         <ol class="writing-list">
@@ -49,18 +45,7 @@ const posts = await getPublishedPosts();
                     </a>
                   </h2>
                   <p>{post.data.description}</p>
-                  <div class="writing-entry-details">
-                    {/* <span class="writing-entry-category">
-                      {post.data.category}
-                    </span> */}
-                    {/* {post.data.tags.length > 0 && (
-                      <ul class="writing-tags" aria-label="Tags">
-                        {post.data.tags.map((tag) => (
-                          <li>#{tag}</li>
-                        ))}
-                      </ul>
-                    )} */}
-                  </div>
+                  <div class="writing-entry-details" />
                 </div>
                 <span class="writing-entry-time">
                   {readingTime(post.body)} min read
@@ -82,9 +67,4 @@ const posts = await getPublishedPosts();
       )
     }
   </section>
-  <!-- <footer class="writing-footer">
-    More from the archive? <a href="https://abams.hashnode.dev/">
-      Read my earlier writing <SketchArrow direction="up-right" />
-    </a>
-  </footer> -->
 </WritingLayout>

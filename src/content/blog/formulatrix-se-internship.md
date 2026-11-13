@@ -1,6 +1,6 @@
 ---
 title: "From First Commit to Final Goodbye: My Formulatrix Internship"
-description: "A story of my three-month internship as a software engineer at Formulatrix."
+description: "A short story of my three-month internship as a software engineer at Formulatrix."
 published: 2026-11-12
 category: Writing
 tags: [work, career]

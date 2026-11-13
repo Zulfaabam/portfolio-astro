@@ -1,9 +1,20 @@
 .writing-shell {
   --writing-muted: #55554f;
-  max-width: var(--site-width);
+  max-width: var(--blog-width);
   margin-inline: auto;
-  padding: 2.5rem var(--site-gutter) 5rem;
+  padding: 2.5rem 0px 5rem;
   overflow-wrap: anywhere;
+}
+.writing-shell.writing-shell-detail {
+  --writing-title-size: 32px;
+  --writing-body-size: 16px;
+  --writing-heading-1-size: 28px;
+  --writing-heading-2-size: 24px;
+  --writing-heading-3-size: 20px;
+  --writing-heading-4-size: 18px;
+  --writing-heading-small-size: 16px;
+  --writing-supporting-size: 14px;
+  max-width: 720px;
 }
 .writing-shell :is(p, li, time, code, pre, span, a, th, td, strong, em, del) {
   font-family: inherit;
@@ -18,7 +29,8 @@
 }
 .writing-skip {
   position: fixed;
-  inset: 0.5rem auto auto 1rem;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 1rem;
   transform: translateY(-200%);
   z-index: 100;
   padding: 0.75rem 1rem;
@@ -33,7 +45,10 @@
   gap: 0.3em;
   min-height: 44px;
   color: var(--color-blue);
-  font-size: 1rem;
+  font-size: 0.875rem;
+}
+.writing-shell-detail .writing-back {
+  font-size: var(--writing-body-size);
 }
 .writing-shell a:hover {
   text-decoration: underline;
@@ -43,14 +58,8 @@
   padding-block: 1.5rem 2rem;
   max-width: 760px;
 }
-.writing-eyebrow {
-  display: inline-block;
-  color: var(--color-blue);
-  font-size: 0.875rem;
-  transform: rotate(-2deg);
-}
 .writing-intro h1 {
-  font-size: 2.25rem;
+  font-size: 2rem;
   margin: 0.5rem 0 0.75rem;
   line-height: 1.1;
   letter-spacing: -0.035em;
@@ -62,7 +71,7 @@
 .writing-intro p,
 .writing-shell .writing-deck {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   line-height: 1.6;
   text-wrap: pretty;
   color: var(--writing-muted);
@@ -71,21 +80,6 @@
   font-family: "Drawably Pen", sans-serif;
   font-size: 1rem;
   margin: 0;
-}
-.writing-section-label {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 0.5rem;
-}
-.writing-section-label h2 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-.writing-section-label > span {
-  color: var(--writing-muted);
-  font-size: 0.875rem;
 }
 .writing-list {
   list-style: none;
@@ -102,7 +96,7 @@
 .writing-entry-date,
 .writing-entry-time {
   color: var(--writing-muted);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   line-height: 1.5;
   white-space: nowrap;
 }
@@ -118,16 +112,6 @@
   font-size: 0.8125rem;
   line-height: 1.5;
 }
-.writing-entry-category {
-  color: var(--color-blue);
-}
-.writing-entry .writing-tags {
-  margin: 0;
-  gap: 0.25rem 0.75rem;
-  font-family: "Drawably Pen", sans-serif;
-  font-size: inherit;
-  line-height: inherit;
-}
 .writing-meta {
   display: flex;
   flex-wrap: wrap;
@@ -138,6 +122,9 @@
   line-height: 1.5;
   color: var(--writing-muted);
 }
+.writing-shell-detail .writing-meta {
+  font-size: var(--writing-supporting-size);
+}
 .writing-category {
   color: var(--color-blue);
   border: 1px solid currentColor;
@@ -146,7 +133,7 @@
 }
 .writing-entry h2 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.4;
 }
@@ -163,29 +150,6 @@
   margin-block: 0.25rem 0;
   text-wrap: pretty;
 }
-.writing-tags {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  padding: 0;
-  margin: 1rem 0 0;
-  color: var(--writing-muted);
-  font-family: system-ui, sans-serif;
-  font-size: 0.8rem;
-  line-height: 1.6;
-}
-.writing-footer {
-  margin-top: 1.5rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--writing-muted);
-}
-.writing-footer a {
-  color: var(--color-blue);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
 .writing-empty {
   padding-block: 3rem;
 }
@@ -197,44 +161,29 @@
 .writing-detail {
   margin-top: 2rem;
 }
-.writing-detail.has-contents {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 190px;
-  grid-template-areas: "article contents";
-  align-items: start;
-  gap: 2.5rem;
-}
 .writing-paper {
-  grid-area: article;
   min-width: 0;
-  max-width: 800px;
-  background: var(--color-paper);
-  border: 1px solid #b9b4a5;
-  box-shadow: 4px 5px 0 #d3d0c5;
-  padding: clamp(1.25rem, 4vw, 3.25rem);
 }
 .writing-article-header {
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #c7c0ad;
-  margin-bottom: 2rem;
+  margin-block-end: 3rem;
 }
 .writing-article-header h1 {
   margin: 1.5rem 0 1rem;
-  font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+  font-size: var(--writing-title-size);
   line-height: 1.1;
   letter-spacing: -0.025em;
   text-wrap: balance;
 }
-.writing-byline {
-  margin-top: 1.5rem;
-  font-size: 1rem;
-  line-height: 1.6;
-}
 .writing-prose {
   max-width: 68ch;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.125rem;
+  font-size: var(--writing-body-size);
   line-height: 1.6;
+}
+.writing-prose,
+.writing-shell-detail :is(.writing-deck, .writing-meta),
+.writing-shell-detail .writing-prose :is(code, kbd, pre, code span) {
+  font-family: var(--font-inter, sans-serif);
+  font-optical-sizing: auto;
 }
 .writing-prose > :first-child {
   margin-top: 0;
@@ -250,19 +199,22 @@
   text-wrap: balance;
 }
 .writing-prose h1 {
-  font-size: 2.25rem;
+  font-size: var(--writing-heading-1-size);
 }
 .writing-prose h2 {
-  font-size: 2rem;
+  font-size: var(--writing-heading-2-size);
 }
 .writing-prose h3 {
-  font-size: 1.6rem;
+  font-size: var(--writing-heading-3-size);
 }
 .writing-prose h4 {
-  font-size: 1.3rem;
+  font-size: var(--writing-heading-4-size);
 }
 .writing-prose :is(h5, h6) {
-  font-size: 1.125rem;
+  font-size: var(--writing-heading-small-size);
+}
+.writing-prose h6 {
+  margin-block: 1.5em 0.5em;
 }
 .writing-prose :is(p, ul, ol, blockquote, pre, table, figure) {
   margin-block: 1.25rem;
@@ -288,11 +240,10 @@
   color: var(--writing-muted);
   font-style: italic;
 }
-.writing-prose :is(code, kbd, pre, code span) {
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+.writing-prose :is(code, kbd) {
+  font-size: var(--writing-supporting-size);
 }
 .writing-prose :not(pre) > code {
-  font-size: 0.85em;
   padding: 0.15em 0.3em;
   background: #e7dfca;
   border-radius: 3px;
@@ -301,7 +252,7 @@
   padding: 1.25rem;
   overflow-x: auto;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: var(--writing-supporting-size);
   line-height: 1.6;
 }
 .writing-prose pre code {
@@ -318,7 +269,7 @@
 }
 .writing-prose figcaption {
   color: var(--writing-muted);
-  font-size: 0.9rem;
+  font-size: var(--writing-supporting-size);
   margin-top: 0.5rem;
 }
 .writing-prose table {
@@ -326,7 +277,7 @@
   width: 100%;
   overflow-x: auto;
   border-collapse: collapse;
-  font-size: 1rem;
+  font-size: inherit;
 }
 .writing-prose :is(th, td) {
   border: 1px solid #c7c0ad;
@@ -344,92 +295,32 @@
 }
 .writing-prose .contains-task-list {
   list-style: none;
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 .writing-article-footer {
-  border-top: 1px solid #c7c0ad;
-  padding-top: 1.5rem;
-  margin-top: 3rem;
+  margin-block-start: 3rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 1rem;
+  font-size: var(--writing-body-size);
   line-height: 1.6;
 }
 .writing-article-footer a {
   color: var(--color-blue);
 }
-.writing-contents {
-  grid-area: contents;
-  position: sticky;
-  top: calc(var(--nav-height) + 2rem);
-  max-height: calc(100svh - var(--nav-height) - 4rem);
-  overflow-y: auto;
-  padding: 0.5rem;
-}
-.writing-contents h2 {
-  font-size: 1.25rem;
-  margin: 0 0 1rem;
-}
-.writing-contents ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-left: 1px solid #aaa99f;
-}
-.writing-contents li {
-  font-family: system-ui, sans-serif;
-  font-size: 0.8rem;
-  line-height: 1.6;
-}
-.writing-contents li a {
-  display: block;
-  padding: 0.4rem 0 0.4rem 1rem;
-  color: var(--writing-muted);
-}
-.writing-contents .is-subheading a {
-  padding-left: 1.75rem;
-}
-.writing-top {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 0.3em;
-  margin-top: 1rem;
-  color: var(--color-blue);
-}
-@media (max-width: 850px) {
-  .writing-detail.has-contents {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "contents" "article";
-    gap: 1.5rem;
-  }
-  .writing-contents {
-    position: static;
-    max-height: none;
-  }
-  .writing-contents .writing-top {
-    display: none;
-  }
-}
 @media (max-width: 480px) {
-  .writing-shell {
-    padding: 1.5rem 1rem 3rem;
-  }
   .writing-intro {
     padding-block: 1rem 1.5rem;
   }
-  .writing-prose {
-    font-size: 1rem;
-  }
-  .writing-prose h2 {
-    font-size: 1.75rem;
-  }
-  .writing-prose h3 {
-    font-size: 1.45rem;
-  }
 }
 @media (max-width: 640px) {
+  .writing-shell.writing-shell-detail {
+    --writing-title-size: 30px;
+    --writing-body-size: 15px;
+    --writing-heading-1-size: 26px;
+    --writing-heading-2-size: 22px;
+  }
   .writing-article-header h1 {
     line-height: 1.4;
   }
@@ -448,5 +339,10 @@
   }
   .writing-entry-content {
     grid-column: 1 / -1;
+  }
+}
+@media (max-width: 720px) {
+  .writing-shell {
+    padding: 1.5rem var(--site-gutter) 3rem;
   }
 }

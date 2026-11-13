@@ -23,6 +23,7 @@ const {
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <slot name="head" />
     <ClientRouter />
   </head>
   <body>
@@ -42,6 +43,7 @@ const {
 
   :root {
     --site-width: 1100px;
+    --blog-width: 720px;
     --site-gutter: 1.5rem;
     --nav-height: 4rem;
     --color-white: #e3e3e1;
@@ -53,6 +55,12 @@ const {
     --color-black: #000000;
     --color-red: #d12724;
     --color-paper: #f6efdc;
+  }
+
+  @media (max-width: 480px) {
+    :root {
+      --site-gutter: 1rem;
+    }
   }
 
   html,
