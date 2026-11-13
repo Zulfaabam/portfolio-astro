@@ -27,6 +27,15 @@ body.custom-note-scroll-locked {
 }
 .custom-note-dialog::backdrop {
   background: rgb(9 10 12 / 72%);
+  opacity: 0;
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.custom-note-dialog[data-state="open"]::backdrop {
+  opacity: 1;
+}
+.custom-note-dialog[data-state="closing"]::backdrop {
+  /* Fade during the final 200ms of the existing 760ms close lifecycle. */
+  transition-delay: 560ms;
 }
 .custom-note-backdrop {
   position: fixed;
@@ -287,6 +296,13 @@ body.custom-note-scroll-locked {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .custom-note-dialog::backdrop {
+    transition-duration: 150ms;
+  }
+  .custom-note-dialog[data-state="closing"]::backdrop {
+    /* The reduced-motion close lifecycle lasts 200ms. */
+    transition-delay: 50ms;
+  }
   .custom-note-page[data-depth],
   .custom-note-dialog[data-state="opening"] .custom-note-page,
   .custom-note-dialog[data-state="closing"] .custom-note-page {

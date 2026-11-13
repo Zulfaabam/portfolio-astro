@@ -1,11 +1,11 @@
 ---
-company: "PT Tiga Daya Digital Indonesia"
-role: "Frontend Developer"
+company: "Eksad"
+role: "Frontend Dev"
 
 start: 2025-01-01
 end: 2025-12-31
 
-location: "Jakarta, Indonesia"
+location: "Jakarta, Indonesia (Remote)"
 
 technologies:
   - React

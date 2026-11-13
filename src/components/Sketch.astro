@@ -8,6 +8,7 @@ import ProjectNoteContent from "./ProjectNoteContent.astro";
 import SketchButton from "./ui/SketchButton.astro";
 import FeaturedProjects from "./FeaturedProjects.astro";
 import SketchDivider from "./ui/SketchDivider.astro";
+import JourneyAccordion from "./JourneyAccordion.astro";
 import {
   getPublishedPosts,
   formatPostDate,
@@ -16,8 +17,6 @@ import {
 } from "../lib/blog";
 
 const homeContent = await getEntry("home", "home");
-const miniJourneys =
-  homeContent?.data?.miniJourneys?.sort((a, b) => b.id - a.id) ?? [];
 const projects = (await getCollection("projects"))
   .sort((a, b) => b.data.created_at.getTime() - a.data.created_at.getTime())
   .slice(0, 10)
@@ -70,20 +69,9 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3);
       </section>
 
       <section class="chapters">
-        <div class="chapter">
-          <h3><span>Journey</span></h3>
-          <ul class="drawably-list" data-drawably-list>
-            {
-              miniJourneys.map((journey) => (
-                <li>
-                  <span class="number job-year">{journey.year}</span>
-                  <span>{journey.job}</span>
-                  <small>{journey.place}</small>
-                  <SketchDivider class="row-divider" />
-                </li>
-              ))
-            }
-          </ul>
+        <div class="chapter" aria-labelledby="home-journey-heading">
+          <h2 id="home-journey-heading"><span>Journey</span></h2>
+          <JourneyAccordion />
         </div>
 
         <div class="chapter" aria-labelledby="home-blog-heading">
@@ -169,10 +157,10 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3);
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    })
+    }),
   );
   initializeSketches("[data-drawably-highlight]", (el) =>
-    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 })
+    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 }),
   );
 </script>
 
@@ -279,8 +267,7 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3);
     display: none;
   } */
 
-  .number,
-  .job-year {
+  .number {
     color: var(--color-dark-gray);
     font-size: 0.75rem;
   }

@@ -1,7 +1,7 @@
 import { useMemo, type Ref } from "react";
 import { roughRoundedRect, scribbleFill } from "drawably";
 import { DrawablyButton } from "drawably/react";
-import SketchArrow from "./ui/SketchArrow";
+import SketchArrow from "../ui/SketchArrow";
 
 interface Props {
   id: string;

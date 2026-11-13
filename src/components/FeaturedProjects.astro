@@ -21,7 +21,7 @@ const technologies: { id: string; name: string }[] = parse(techCsv, {
 });
 const relations: { project_id: string; tech_stack_id: string }[] = parse(
   projectTechCsv,
-  { columns: true, skip_empty_lines: true }
+  { columns: true, skip_empty_lines: true },
 );
 const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
 ---
@@ -124,17 +124,17 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
   import { initializeSketches } from "./ui/initializeSketches";
 
   initializeSketches("[data-tech-badge]", (element) =>
-    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 })
+    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 }),
   );
 
   initializeSketches("[data-project-frame]", (element) =>
-    drawablyCard(element, { roughness: 0.8, boil: 0.2 })
+    drawablyCard(element, { roughness: 0.8, boil: 0.2 }),
   );
 
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     const button = event.target.closest<HTMLButtonElement>(
-      "[data-featured-select]"
+      "[data-featured-select]",
     );
     const showcase = button?.closest("[data-featured-projects]");
     if (!button || !showcase) return;
@@ -301,6 +301,10 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     cursor: pointer;
     color: white;
     font: inherit;
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .project-thumbnail:active:not(:focus-visible) {
+    transform: scale(0.98);
   }
   .project-thumbnail img {
     display: block;
@@ -331,6 +335,16 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
   .project-thumbnail:focus-visible {
     outline: 2px solid var(--color-blue);
     outline-offset: 2px;
+    transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .project-thumbnail {
+      transition: opacity 100ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .project-thumbnail:active:not(:focus-visible) {
+      transform: none;
+      opacity: 0.9;
+    }
   }
   @media (max-width: 560px) {
     .featured-projects {

@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import PaperNotePage from "./PaperNotePage";
-import "./paper-notes.css";
+import "../../styles/paper-notes.css";
 
 interface Props {
   id: string;
