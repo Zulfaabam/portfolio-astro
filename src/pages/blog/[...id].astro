@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { render } from "astro:content";
+import { imageConfig, inferRemoteSize } from "astro:assets";
 import WritingLayout from "../../layouts/WritingLayout.astro";
 import SketchArrow from "../../components/ui/SketchArrow";
 import { getPublishedPosts, formatPostDate, readingTime } from "../../lib/blog";
@@ -15,6 +16,9 @@ interface Props {
 }
 const { post } = Astro.props;
 const { Content } = await render(post);
+const coverImageSize = post.data.coverImage
+  ? await inferRemoteSize(post.data.coverImage, imageConfig)
+  : undefined;
 ---
 
 <WritingLayout
@@ -37,6 +41,20 @@ const { Content } = await render(post);
         </div>
         <h1>{post.data.title}</h1>
         <p class="writing-deck">{post.data.description}</p>
+        {
+          post.data.coverImage && coverImageSize && (
+            <img
+              class="writing-cover"
+              src={post.data.coverImage}
+              alt=""
+              width={coverImageSize.width}
+              height={coverImageSize.height}
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+            />
+          )
+        }
       </header>
       <div class="writing-prose"><Content /></div>
       <footer class="writing-article-footer">

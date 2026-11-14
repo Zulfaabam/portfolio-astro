@@ -3,6 +3,15 @@ import react from "@astrojs/react";
 
 export default defineConfig({
   integrations: [react()],
+  image: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.hashnode.com",
+        pathname: "/uploads/**",
+      },
+    ],
+  },
   fonts: [
     {
       provider: fontProviders.fontsource(),

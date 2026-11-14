@@ -4,7 +4,7 @@ description: "An example entry: a starting point for project deep dives, learnin
 published: 2026-11-12
 category: Writing
 tags: [notebook, getting-started]
-draft: false
+draft: true
 ---
 
 A finished project only tells part of the story. The interesting details often live in the decisions, experiments, and small lessons along the way.

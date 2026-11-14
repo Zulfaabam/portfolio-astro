@@ -30,6 +30,7 @@ Share the outcome and what you would do differently.
 The filename determines the URL: `/blog/my-project`. Nested folders also work: `projects/my-project.md` becomes `/blog/projects/my-project`.
 
 - Required fields: `title`, `description`, and `published` (YYYY-MM-DD).
+- `coverImage`: optional full image URL, displayed below the article title and description. The cover loads directly from the URL, with its dimensions inferred to reserve space while it loads.
 - `category`: `Project`, `Learning`, `Story`, or `Writing` (default).
 - `tags`: optional list, defaults to empty.
 - `updated`: optional date, displayed beside the author.
