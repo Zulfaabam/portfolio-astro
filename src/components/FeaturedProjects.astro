@@ -3,6 +3,7 @@ import { parse } from "csv-parse/sync";
 import techCsv from "../content/tech_stack.csv?raw";
 import projectTechCsv from "../content/project_tech_stack.csv?raw";
 import ExternalLink from "./ui/ExternalLink.astro";
+import TechBadge from "./ui/TechBadge.astro";
 
 interface Props {
   projects: {
@@ -22,7 +23,7 @@ const technologies: { id: string; name: string }[] = parse(techCsv, {
 });
 const relations: { project_id: string; tech_stack_id: string }[] = parse(
   projectTechCsv,
-  { columns: true, skip_empty_lines: true },
+  { columns: true, skip_empty_lines: true }
 );
 const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
 ---
@@ -50,15 +51,6 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
           <div class="project-heading">
             <h4 id={`featured-title-${project.id}`}>{project.title}</h4>
             <div class="project-links">
-              {project.storyUrl && (
-                <a
-                  class="project-story-link"
-                  href={project.storyUrl}
-                  aria-label={`Read the ${project.title} story`}
-                >
-                  Read story
-                </a>
-              )}
               {project.demo && (
                 <ExternalLink
                   href={project.demo}
@@ -76,7 +68,16 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
                   Code
                 </ExternalLink>
               )}
-              {!project.demo && !project.repository && <span>Private</span>}
+              {!project.demo && !project.repository && <span>Privated</span>}
+              {project.storyUrl && (
+                <a
+                  class="project-story-link"
+                  href={project.storyUrl}
+                  aria-label={`Read the ${project.title} story`}
+                >
+                  Read story
+                </a>
+              )}
             </div>
           </div>
           <p class="project-description">{project.description}</p>
@@ -87,9 +88,7 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
               .filter(Boolean)
               .map((name) => (
                 <li>
-                  <span class="tech-badge" data-tech-badge>
-                    {name}
-                  </span>
+                  <TechBadge>{name}</TechBadge>
                 </li>
               ))}
           </ul>
@@ -130,21 +129,17 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
 </div>
 
 <script>
-  import { drawablyBadge, drawablyCard } from "drawably";
+  import { drawablyCard } from "drawably";
   import { initializeSketches } from "./ui/initializeSketches";
 
-  initializeSketches("[data-tech-badge]", (element) =>
-    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 }),
-  );
-
   initializeSketches("[data-project-frame]", (element) =>
-    drawablyCard(element, { roughness: 0.8, boil: 0.2 }),
+    drawablyCard(element, { roughness: 0.8, boil: 0.2 })
   );
 
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     const button = event.target.closest<HTMLButtonElement>(
-      "[data-featured-select]",
+      "[data-featured-select]"
     );
     const showcase = button?.closest("[data-featured-projects]");
     if (!button || !showcase) return;
@@ -282,19 +277,6 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     list-style: none;
     margin: 0.75rem 0 0;
     padding: 0;
-  }
-  .tech-badge {
-    display: inline-block;
-    padding: 0.4rem 0.5rem;
-    font: inherit;
-    font-size: 0.65rem;
-    color: var(--color-black);
-    --drawably-stroke: var(--color-gray);
-    --drawably-fill: var(--color-gray);
-  }
-  /* Drawably badges expose outline/scribble variants; fill the sketch itself. */
-  .tech-badge :global(.drawably-outline) {
-    fill: var(--color-gray);
   }
   .project-picker {
     display: grid;

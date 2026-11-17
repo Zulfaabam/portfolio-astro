@@ -1,0 +1,30 @@
+---
+import "drawably/style.css";
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"span">;
+const { class: className, ...attributes } = Astro.props;
+---
+
+<span {...attributes} class:list={["tech-badge", className]} data-tech-badge>
+  <slot />
+</span>
+
+<script>
+  import { drawablyBadge } from "drawably";
+  import { initializeSketches } from "./initializeSketches";
+
+  initializeSketches("[data-tech-badge]", (element) =>
+    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 })
+  );
+</script>
+
+<style>
+  .tech-badge {
+    display: inline-block;
+    padding: 0.25rem 0.55rem;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    --drawably-stroke: var(--color-purple);
+  }
+</style>

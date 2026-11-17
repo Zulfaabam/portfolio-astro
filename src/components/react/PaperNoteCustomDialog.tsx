@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import PaperNotePage from "./PaperNotePage";
+import ProjectImageZoom, { type ZoomedProjectImage } from "./ProjectImageZoom";
 import "../../styles/paper-notes.css";
 
 interface Props {
@@ -28,6 +29,9 @@ export default function PaperNoteCustomDialog({
 }: Props) {
   const [phase, setPhase] = useState<Phase>("closed");
   const [pageIndex, setPageIndex] = useState(0);
+  const [zoomedImage, setZoomedImage] = useState<ZoomedProjectImage | null>(
+    null,
+  );
   const dialogRef = useRef<HTMLDialogElement>(null);
   const stackRef = useRef<HTMLDivElement>(null);
   const activePageRef = useRef<HTMLElement>(null);
@@ -36,6 +40,7 @@ export default function PaperNoteCustomDialog({
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
   const pageCount = pages.length;
   const isOpen = phase !== "closed";
+  const dismissImage = useCallback(() => setZoomedImage(null), []);
 
   const open = useCallback(
     (requestedPage = 0) => {
@@ -58,11 +63,13 @@ export default function PaperNoteCustomDialog({
   );
 
   function close() {
+    dismissImage();
     setPhase((current) => (current === "closed" ? current : "closing"));
   }
 
   function changePage(direction: -1 | 1) {
     if (pageCount < 2 || phase === "closing") return;
+    dismissImage();
     focusTargetRef.current = direction === -1 ? "previous" : "next";
     setPageIndex((current) => (current + direction + pageCount) % pageCount);
   }
@@ -97,6 +104,7 @@ export default function PaperNoteCustomDialog({
     document.body.classList.add("custom-note-scroll-locked");
 
     function release() {
+      dismissImage();
       if (dialog?.open) dialog.close();
       if (!wasLocked)
         document.body.classList.remove("custom-note-scroll-locked");
@@ -109,7 +117,7 @@ export default function PaperNoteCustomDialog({
       swipeRef.current = null;
       if (lastFocusedRef.current?.isConnected) lastFocusedRef.current.focus();
     };
-  }, [isOpen]);
+  }, [isOpen, dismissImage]);
 
   useEffect(() => {
     if (phase === "opening") {
@@ -214,6 +222,21 @@ export default function PaperNoteCustomDialog({
         }}
         onClose={() => setPhase("closed")}
         onClick={(event) => {
+          if (event.target instanceof Element) {
+            const trigger = event.target.closest<HTMLButtonElement>(
+              "button[data-project-image-zoom]",
+            );
+            const image = trigger?.querySelector("img");
+            if (trigger && image) {
+              setZoomedImage({
+                src: image.currentSrc || image.src,
+                alt: image.alt,
+                trigger,
+                animate: event.detail > 0,
+              });
+              return;
+            }
+          }
           if (
             event.target === event.currentTarget ||
             (event.target instanceof Element &&
@@ -241,6 +264,9 @@ export default function PaperNoteCustomDialog({
           ))}
         </div>
       </dialog>
+      {zoomedImage && (
+        <ProjectImageZoom image={zoomedImage} onDismiss={dismissImage} />
+      )}
     </>
   );
 }

@@ -1,12 +1,12 @@
 ---
 import { getCollection, render } from "astro:content";
 import SketchDivider from "./ui/SketchDivider.astro";
-import "drawably/style.css";
+import TechBadge from "./ui/TechBadge.astro";
 
 const journeys = await Promise.all(
   (await getCollection("journey"))
     .sort((a, b) => b.data.start.getTime() - a.data.start.getTime())
-    .map(async (entry) => ({ ...entry, ...(await render(entry)) })),
+    .map(async (entry) => ({ ...entry, ...(await render(entry)) }))
 );
 ---
 
@@ -62,9 +62,7 @@ const journeys = await Promise.all(
             >
               {data.technologies.map((technology) => (
                 <li>
-                  <span class="journey-badge" data-journey-badge>
-                    {technology}
-                  </span>
+                  <TechBadge>{technology}</TechBadge>
                 </li>
               ))}
             </ul>
@@ -77,13 +75,6 @@ const journeys = await Promise.all(
 </ul>
 
 <script>
-  import { drawablyBadge } from "drawably";
-  import { initializeSketches } from "./ui/initializeSketches";
-
-  initializeSketches("[data-journey-badge]", (element) =>
-    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 }),
-  );
-
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     const summary = event.target.closest(".journey-item > summary");
@@ -139,7 +130,8 @@ const journeys = await Promise.all(
   }
 
   summary:hover .journey-job {
-    color: var(--color-blue);
+    color: var(--color-black);
+    font-weight: 600;
   }
 
   .journey-job {
@@ -227,14 +219,6 @@ const journeys = await Promise.all(
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  .journey-badge {
-    display: inline-block;
-    padding: 0.25rem 0.55rem;
-    font-size: 0.7rem;
-    line-height: 1.4;
-    --drawably-stroke: var(--color-blue);
   }
 
   @media (max-width: 860px) {

@@ -1,5 +1,6 @@
 ---
 import ExternalLink from "./ui/ExternalLink.astro";
+import SketchArrow from "./ui/SketchArrow";
 interface Props {
   project: {
     title: string;
@@ -19,40 +20,48 @@ const { project } = Astro.props;
   </header>
   <div class="scrapbook-photos">
     <figure class="scrapbook-photo">
-      <img
-        src={project.image}
-        alt={project.title + " overview screenshot"}
-        loading="lazy"
-        decoding="async"
-      />
+      <button
+        type="button"
+        class="project-image-zoom-trigger"
+        data-project-image-zoom
+        aria-haspopup="dialog"
+        aria-label={`Enlarge ${project.title} screenshot`}
+      >
+        <img
+          src={project.image}
+          alt={project.title + " overview screenshot"}
+          loading="lazy"
+          decoding="async"
+        />
+      </button>
     </figure>
   </div>
-  <div class="custom-note-details">
-    <div class="scrapbook-note"><p>{project.description}</p></div>
+
+  <div class="scrapbook-note">
+    <p>{project.description}</p>
     <div class="scrapbook-links">
-      {
-        project.storyUrl && (
-          <a class="project-story-link" href={project.storyUrl}>
-            Read project story
-          </a>
-        )
-      }
       {
         project.repository ? (
           <ExternalLink href={project.repository} underline>
-            Repository
+            Code
           </ExternalLink>
-        ) : (
-          <p>Private repository</p>
-        )
+        ) : null
       }
       {
         project.demo ? (
           <ExternalLink href={project.demo} underline>
-            Live demo
+            Demo
           </ExternalLink>
-        ) : (
-          <p>Demo coming soon</p>
+        ) : null
+      }
+      {
+        project.storyUrl && (
+          <a class="project-story-link" href={project.storyUrl}>
+            <span>Read story </span>
+            <span>
+              <SketchArrow />
+            </span>
+          </a>
         )
       }
     </div>
@@ -76,11 +85,6 @@ const { project } = Astro.props;
 
   .custom-note-heading {
     padding-inline: 0.75rem;
-  }
-  .custom-note-details {
-    align-content: start;
-    position: relative;
-    isolation: isolate;
   }
 
   .scrapbook-photos {
@@ -129,16 +133,22 @@ const { project } = Astro.props;
     background: #e5eadf;
   }
 
-  .custom-note-details {
-    display: flex;
-    align-items: flex-start;
-    gap: 1.5rem;
-    padding: 0.25rem 0.75rem 1rem;
+  .project-image-zoom-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .project-image-zoom-trigger:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 4px;
   }
 
   .scrapbook-note {
     position: relative;
-    flex: 1;
+    width: 100%;
     min-width: 0;
     padding: 1.25rem 1.5rem;
     background-color: #eee4cd;
@@ -147,48 +157,43 @@ const { project } = Astro.props;
       linear-gradient(90deg, rgb(131 112 77 / 10%) 1px, transparent 1px);
     background-size: 13px 13px;
     box-shadow: 1px 3px 4px rgb(67 49 24 / 12%);
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
-  .scrapbook-note::before {
+  .scrapbook-note::before,
+  .scrapbook-note::after {
     content: "";
     position: absolute;
     width: 3rem;
     height: 1.1rem;
     inset-block-start: -0.45rem;
-    inset-inline-end: 0.75rem;
     background: rgb(174 144 96 / 45%);
-    transform: rotate(-12deg);
     pointer-events: none;
+  }
+  .scrapbook-note::before {
+    inset-inline-end: 0.75rem;
+    transform: rotate(-12deg);
+  }
+  .scrapbook-note::after {
+    inset-inline-start: 0.75rem;
+    transform: rotate(12deg);
   }
   .project-story-link {
     color: var(--color-blue);
+    text-decoration: underline;
   }
   .scrapbook-links {
-    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-    flex: 0 0 9rem;
-    padding: 1rem;
-    background: #e8d9b9;
-    box-shadow: 1px 3px 4px rgb(67 49 24 / 12%);
+    align-items: center;
+    gap: 0.5rem 1.5rem;
     font-size: 0.8rem;
     color: var(--color-dark-gray);
   }
 
-  .scrapbook-links::before {
-    content: "";
-    position: absolute;
-    width: 3rem;
-    height: 1.1rem;
-    top: -0.5rem;
-    left: calc(50% - 1.5rem);
-    background: rgb(174 144 96 / 45%);
-    transform: rotate(8deg);
-    clip-path: polygon(2% 0, 98% 4%, 100% 92%, 0 100%);
-    pointer-events: none;
-  }
-
-  .custom-note-details p {
+  .scrapbook-links p,
+  .scrapbook-note p {
     margin: 0;
   }
 
@@ -205,26 +210,11 @@ const { project } = Astro.props;
       font-size: 0.8125rem;
       line-height: 1.55;
     }
-    .custom-note-details {
-      padding-inline: 0;
-    }
     .scrapbook-photos {
       width: min(100%, 280px, 38dvh);
     }
     .scrapbook-note {
       padding: 1rem;
-    }
-  }
-  @media (max-width: 480px) {
-    .custom-note-details {
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .scrapbook-links {
-      flex: auto;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 1rem;
     }
   }
 </style>
