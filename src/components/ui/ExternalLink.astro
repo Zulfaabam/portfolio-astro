@@ -19,7 +19,7 @@ const { underline = false, class: className, ...attributes } = Astro.props;
 
 <style>
   .external-link {
-    color: var(--color-blue);
+    color: var(--color-text-link);
     text-underline-offset: 0.2em;
   }
   .external-link:hover,
@@ -27,7 +27,7 @@ const { underline = false, class: className, ...attributes } = Astro.props;
     text-decoration: underline;
   }
   .external-link:focus-visible {
-    outline: 2px solid var(--color-blue);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 4px;
   }
 </style>

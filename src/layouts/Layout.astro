@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import Nav from "../components/Nav.astro";
+import "../styles/fonts.css";
 
 interface Props {
   title?: string;
@@ -49,17 +50,58 @@ const {
     --color-white: #e3e3e1;
     --color-blue: #2724d1;
     --color-green: #188a42;
+    --color-green-strong: #126a33;
     --color-light-green: #0f766e;
     --color-gray: #a1a1aa;
-    --color-black: #18181b;
     --color-light-gray: #37373d;
     --color-black: #000000;
+    --color-gray-strong: #55554f;
     --color-red: #d12724;
     --color-paper: #f6efdc;
     --color-purple: #6d4bd6;
     --color-light-purple: #2724d14d;
     --color-orange: #b45309;
-    /* --color-badge-fill: #8a8a8b; */
+    --color-gray-950-alpha85: rgb(9 10 12 / 85%);
+    --color-gray-900: #181a1f;
+    --color-gray-50: #f3f4f6;
+    --color-gray-400: #9ca3af;
+    --color-bg-page: var(--color-white);
+    --color-bg-paper: var(--color-paper);
+    --color-bg-accent: var(--color-blue);
+    --color-bg-panel: color-mix(
+      in srgb,
+      var(--color-white) 85%,
+      var(--color-gray)
+    );
+    --color-bg-media: color-mix(
+      in srgb,
+      var(--color-white) 70%,
+      var(--color-gray)
+    );
+    --color-text-primary: var(--color-black);
+    --color-text-inverse: var(--color-white);
+    --color-text-muted: var(--color-gray-strong);
+    --color-text-emphasis: var(--color-green-strong);
+    --color-text-link: var(--color-blue);
+    --color-action-solid: var(--color-green-strong);
+    --color-border-default: var(--color-black);
+    --color-border-muted: var(--color-gray);
+    --color-border-subtle: color-mix(
+      in srgb,
+      var(--color-gray) 45%,
+      var(--color-white)
+    );
+    --color-border-interactive: var(--color-blue);
+    --color-border-badge: var(--color-purple);
+    --color-decoration-ink: var(--color-blue);
+    --color-focus-ring: var(--color-blue);
+    --color-bg-nav: var(--color-gray-950-alpha85);
+    --color-border-nav: var(--color-gray-900);
+    --color-text-nav: var(--color-gray-50);
+    --color-text-nav-muted: var(--color-gray-400);
+
+    --text-caption: 0.75rem;
+    --text-label: 0.8125rem;
   }
 
   @media (max-width: 480px) {
@@ -74,8 +116,8 @@ const {
     padding: 0;
     width: 100%;
     min-height: 100%;
-    background-color: var(--color-white);
-    color: var(--color-black);
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -86,6 +128,11 @@ const {
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  /* Drawably Pen provides a regular face only. */
+  :where(h1, h2, h3, h4, h5, h6) {
+    font-weight: 400;
   }
 
   hr {

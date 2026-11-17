@@ -54,7 +54,7 @@ const Tag = href ? "a" : "button";
           : 0.8,
         boil: 0.2,
         variant: el.dataset.sketchButton === "outline" ? "outline" : "solid",
-      })
+      }),
   );
 </script>
 
@@ -78,13 +78,13 @@ const Tag = href ? "a" : "button";
     width: 100%;
   }
   .sketch-button-solid {
-    color: var(--color-white);
-    --drawably-stroke: var(--color-black);
-    --drawably-fill: var(--color-green);
+    color: var(--color-text-inverse);
+    --drawably-stroke: var(--color-border-default);
+    --drawably-fill: var(--color-action-solid);
   }
   .sketch-button-outline {
-    color: var(--color-black);
-    --drawably-stroke: var(--color-blue);
-    --drawably-fill: var(--color-white);
+    color: var(--color-text-primary);
+    --drawably-stroke: var(--color-border-interactive);
+    --drawably-fill: var(--color-bg-page);
   }
 </style>

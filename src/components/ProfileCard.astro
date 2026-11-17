@@ -30,9 +30,9 @@ import TiltCard from "./TiltCard.astro";
     width: 100%;
     aspect-ratio: 1 / 1.35;
     padding: 1rem;
-    color: var(--color-white);
-    --drawably-stroke: var(--color-black);
-    --drawably-fill: var(--color-blue);
+    color: var(--color-text-inverse);
+    --drawably-stroke: var(--color-border-default);
+    --drawably-fill: var(--color-bg-accent);
   }
   .profile-image {
     display: block;
@@ -61,7 +61,7 @@ import TiltCard from "./TiltCard.astro";
   }
   .profile-caption p {
     margin: 0.75rem 0 0;
-    font-size: 0.68rem;
+    font-size: var(--text-label);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }

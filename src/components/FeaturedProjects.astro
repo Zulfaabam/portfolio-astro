@@ -23,7 +23,7 @@ const technologies: { id: string; name: string }[] = parse(techCsv, {
 });
 const relations: { project_id: string; tech_stack_id: string }[] = parse(
   projectTechCsv,
-  { columns: true, skip_empty_lines: true }
+  { columns: true, skip_empty_lines: true },
 );
 const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
 ---
@@ -133,13 +133,13 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
   import { initializeSketches } from "./ui/initializeSketches";
 
   initializeSketches("[data-project-frame]", (element) =>
-    drawablyCard(element, { roughness: 0.8, boil: 0.2 })
+    drawablyCard(element, { roughness: 0.8, boil: 0.2 }),
   );
 
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     const button = event.target.closest<HTMLButtonElement>(
-      "[data-featured-select]"
+      "[data-featured-select]",
     );
     const showcase = button?.closest("[data-featured-projects]");
     if (!button || !showcase) return;
@@ -173,11 +173,7 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     display: none;
   }
   [data-project-frame] {
-    --drawably-stroke: color-mix(
-      in srgb,
-      var(--color-gray) 45%,
-      var(--color-white)
-    );
+    --drawably-stroke: var(--color-border-subtle);
   }
   [data-project-frame] > :global(.drawably-svg) {
     z-index: 1;
@@ -191,10 +187,10 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     background:
       radial-gradient(
         ellipse at top right,
-        var(--color-paper),
+        var(--color-bg-paper),
         transparent 70%
       ),
-      color-mix(in srgb, var(--color-white) 70%, var(--color-gray));
+      var(--color-bg-media);
   }
   .project-image {
     position: absolute;
@@ -244,23 +240,27 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
   h4 {
     margin: 0;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 400;
   }
   .project-story-link {
-    color: var(--color-blue);
+    color: var(--color-text-link);
   }
   .project-links {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.7rem;
     font-size: 0.75rem;
-    color: var(--color-dark-gray);
+    color: var(--color-text-primary);
+  }
+  .project-links :global(a) {
+    white-space: nowrap;
   }
   .live-dot {
     display: inline-block;
     width: 0.45rem;
     height: 0.45rem;
-    margin-right: 0.3rem;
+    margin-inline-end: 0.3rem;
     border-radius: 50%;
     background: #22b864;
   }
@@ -268,7 +268,7 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     margin: 0.65rem 0 0;
     font-size: 0.85rem;
     line-height: 1.6;
-    color: var(--color-dark-gray);
+    color: var(--color-text-primary);
   }
   .tech-stack {
     display: flex;
@@ -282,7 +282,7 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     display: grid;
     gap: 0.5rem;
     padding: 0.8rem;
-    background: color-mix(in srgb, var(--color-white) 85%, var(--color-gray));
+    background: var(--color-bg-panel);
     border-radius: 0.6rem;
   }
   .project-thumbnail {
@@ -328,7 +328,7 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     display: grid;
   }
   .project-thumbnail:focus-visible {
-    outline: 2px solid var(--color-blue);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
     transition: none;
   }
@@ -350,7 +350,7 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     .active-label {
-      font-size: 0.7rem;
+      font-size: var(--text-caption);
     }
   }
 </style>

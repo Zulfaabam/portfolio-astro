@@ -70,7 +70,7 @@ const { project } = Astro.props;
 <style>
   .custom-note-kicker {
     margin: 0 0 0.75rem;
-    color: var(--color-green);
+    color: var(--color-text-emphasis);
     font-size: 0.75rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -142,7 +142,7 @@ const { project } = Astro.props;
     cursor: pointer;
   }
   .project-image-zoom-trigger:focus-visible {
-    outline: 2px solid var(--color-blue);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 4px;
   }
 
@@ -181,15 +181,20 @@ const { project } = Astro.props;
     transform: rotate(12deg);
   }
   .project-story-link {
-    color: var(--color-blue);
+    color: var(--color-text-link);
     text-decoration: underline;
   }
   .scrapbook-links {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem 1.5rem;
     font-size: 0.8rem;
-    color: var(--color-dark-gray);
+    color: var(--color-text-primary);
+  }
+
+  .scrapbook-links > :global(a) {
+    white-space: nowrap;
   }
 
   .scrapbook-links p,

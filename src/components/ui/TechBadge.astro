@@ -15,7 +15,7 @@ const { class: className, ...attributes } = Astro.props;
   import { initializeSketches } from "./initializeSketches";
 
   initializeSketches("[data-tech-badge]", (element) =>
-    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 })
+    drawablyBadge(element, { variant: "outline", roughness: 0.8, boil: 0.2 }),
   );
 </script>
 
@@ -23,8 +23,8 @@ const { class: className, ...attributes } = Astro.props;
   .tech-badge {
     display: inline-block;
     padding: 0.25rem 0.55rem;
-    font-size: 0.7rem;
+    font-size: var(--text-label);
     line-height: 1.4;
-    --drawably-stroke: var(--color-purple);
+    --drawably-stroke: var(--color-border-badge);
   }
 </style>

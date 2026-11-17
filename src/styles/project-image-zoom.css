@@ -65,7 +65,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-blue);
+  color: var(--color-text-link);
   cursor: pointer;
   opacity: 1;
   transition: opacity var(--image-zoom-duration) var(--image-zoom-ease);

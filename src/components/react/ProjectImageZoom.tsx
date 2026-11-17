@@ -99,7 +99,7 @@ export default function ProjectImageZoom({ image, onDismiss }: Props) {
         <svg
           className="project-image-zoom-close-frame"
           viewBox="0 0 44 44"
-          fill="var(--color-paper)"
+          fill="var(--color-bg-paper)"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"

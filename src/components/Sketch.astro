@@ -1,6 +1,5 @@
 ---
 import "drawably/style.css";
-import "drawably/font.css";
 import { getEntry, getCollection } from "astro:content";
 import ProfileCard from "./ProfileCard.astro";
 import PaperNoteCustomDialog from "./PaperNoteCustomDialog.astro";
@@ -172,7 +171,6 @@ const latestPosts = publishedPosts.slice(0, 3);
     drawablyCard(el, {
       roughness: 0.8,
       boil: 0.2,
-      fill: "#2724d1",
     }),
   );
   initializeSketches("[data-drawably-highlight]", (el) =>
@@ -183,8 +181,8 @@ const latestPosts = publishedPosts.slice(0, 3);
 <style>
   .sketch-page {
     min-height: calc(100svh - var(--nav-height));
-    background: var(--color-white);
-    color: var(--color-black);
+    background: var(--color-bg-page);
+    color: var(--color-text-primary);
   }
   .sketch-layout {
     max-width: var(--site-width);
@@ -218,18 +216,18 @@ const latestPosts = publishedPosts.slice(0, 3);
   .drawably-highlight {
     width: max-content;
     padding: 0.2rem 0.55rem;
-    color: var(--color-black);
-    font-size: 0.68rem;
+    color: var(--color-text-primary);
+    font-size: var(--text-caption);
     letter-spacing: 0.1em;
   }
   .intro h1 {
     margin: 0;
-    color: var(--color-black);
+    color: var(--color-text-primary);
     font-size: 1.75rem;
   }
   .intro p {
     margin: 0;
-    color: var(--color-dark-gray);
+    color: var(--color-text-primary);
     font-size: 0.95rem;
     line-height: 1.65;
     white-space: pre-line;
@@ -250,13 +248,13 @@ const latestPosts = publishedPosts.slice(0, 3);
     display: flex;
     gap: 0.4rem;
     align-items: center;
-    color: var(--color-black);
+    color: var(--color-text-primary);
     font-size: 1.1rem;
   }
   .drawably-list {
     margin: 0;
     padding: 0;
-    background: var(--color-white);
+    background: var(--color-bg-page);
   }
   .drawably-list li {
     position: relative;
@@ -265,7 +263,7 @@ const latestPosts = publishedPosts.slice(0, 3);
     gap: 0.8rem;
     align-items: center;
     padding: 1rem 0 0.75rem 0;
-    color: var(--color-black);
+    color: var(--color-text-primary);
     font-size: 0.875rem;
     list-style: none;
   }
@@ -284,17 +282,17 @@ const latestPosts = publishedPosts.slice(0, 3);
   } */
 
   .number {
-    color: var(--color-dark-gray);
+    color: var(--color-text-primary);
     font-size: 0.75rem;
   }
 
   .drawably-list small {
-    color: var(--color-dark-gray);
-    font-size: 0.7rem;
+    color: var(--color-text-primary);
+    font-size: var(--text-caption);
   }
 
   .load-more-btn {
-    margin-left: auto;
+    margin-inline-start: auto;
   }
   .home-blog-title {
     min-width: 0;
@@ -306,7 +304,7 @@ const latestPosts = publishedPosts.slice(0, 3);
     text-underline-offset: 0.2em;
   }
   .home-blog-title:focus-visible {
-    outline: 2px solid var(--color-blue);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 4px;
   }
   .home-blog-list time,

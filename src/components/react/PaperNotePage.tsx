@@ -66,15 +66,15 @@ export default function PaperNotePage({
       >
         <path
           d={paths.outline}
-          fill="#f6efdc"
-          stroke="#2724d1"
+          fill="var(--color-bg-paper)"
+          stroke="var(--color-decoration-ink)"
           strokeWidth="2"
           strokeLinejoin="round"
         />
         <path
           d={paths.texture}
           fill="none"
-          stroke="#2724d1"
+          stroke="var(--color-decoration-ink)"
           strokeWidth="0.7"
           strokeOpacity="0.06"
         />
