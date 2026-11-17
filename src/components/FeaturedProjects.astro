@@ -12,6 +12,7 @@ interface Props {
     image: string;
     demo?: string;
     repository?: string;
+    storyUrl?: string;
   }[];
 }
 const { projects } = Astro.props;
@@ -49,6 +50,15 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
           <div class="project-heading">
             <h4 id={`featured-title-${project.id}`}>{project.title}</h4>
             <div class="project-links">
+              {project.storyUrl && (
+                <a
+                  class="project-story-link"
+                  href={project.storyUrl}
+                  aria-label={`Read the ${project.title} story`}
+                >
+                  Read story
+                </a>
+              )}
               {project.demo && (
                 <ExternalLink
                   href={project.demo}
@@ -240,6 +250,9 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
+  }
+  .project-story-link {
+    color: var(--color-blue);
   }
   .project-links {
     display: flex;

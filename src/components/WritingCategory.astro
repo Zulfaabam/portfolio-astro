@@ -1,0 +1,20 @@
+---
+import "drawably/style.css";
+
+interface Props {
+  category: string;
+}
+
+const { category } = Astro.props;
+---
+
+<span class="writing-category" data-writing-category-highlight>{category}</span>
+
+<script>
+  import { drawablyHighlight } from "drawably";
+  import { initializeSketches } from "./ui/initializeSketches";
+
+  initializeSketches("[data-writing-category-highlight]", (element) =>
+    drawablyHighlight(element, { roughness: 0.8, boil: 0.2 }),
+  );
+</script>

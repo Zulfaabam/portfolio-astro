@@ -4,6 +4,8 @@ import { render } from "astro:content";
 import { imageConfig, inferRemoteSize } from "astro:assets";
 import WritingLayout from "../../layouts/WritingLayout.astro";
 import SketchArrow from "../../components/ui/SketchArrow";
+import ExternalLink from "../../components/ui/ExternalLink.astro";
+import WritingCategory from "../../components/WritingCategory.astro";
 import { getPublishedPosts, formatPostDate, readingTime } from "../../lib/blog";
 
 export async function getStaticPaths() {
@@ -33,11 +35,21 @@ const coverImageSize = post.data.coverImage
     <article class="writing-paper">
       <header class="writing-article-header">
         <div class="writing-meta">
-          <span class="writing-category">{post.data.category}</span>
+          <WritingCategory category={post.data.category} />
           <time datetime={post.data.published.toISOString()}>
             {formatPostDate(post.data.published)}
           </time>
           <span>{readingTime(post.body)} min read</span>
+          {
+            post.data.repository && (
+              <ExternalLink href={post.data.repository}>Code</ExternalLink>
+            )
+          }
+          {
+            post.data.demo && (
+              <ExternalLink href={post.data.demo}>Live demo</ExternalLink>
+            )
+          }
         </div>
         <h1>{post.data.title}</h1>
         <p class="writing-deck">{post.data.description}</p>

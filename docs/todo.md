@@ -6,3 +6,4 @@
 - [x] New CV
 - [x] Integrate blog from hashnode
 - [ ] Project story telling
+- [ ] connect to supabase (?)

@@ -7,6 +7,7 @@ interface Props {
     image: string;
     repository?: string;
     demo?: string;
+    storyUrl?: string;
   };
 }
 const { project } = Astro.props;
@@ -29,6 +30,13 @@ const { project } = Astro.props;
   <div class="custom-note-details">
     <div class="scrapbook-note"><p>{project.description}</p></div>
     <div class="scrapbook-links">
+      {
+        project.storyUrl && (
+          <a class="project-story-link" href={project.storyUrl}>
+            Read project story
+          </a>
+        )
+      }
       {
         project.repository ? (
           <ExternalLink href={project.repository} underline>
@@ -150,6 +158,9 @@ const { project } = Astro.props;
     background: rgb(174 144 96 / 45%);
     transform: rotate(-12deg);
     pointer-events: none;
+  }
+  .project-story-link {
+    color: var(--color-blue);
   }
   .scrapbook-links {
     position: relative;

@@ -2,6 +2,7 @@
 import WritingLayout from "../../layouts/WritingLayout.astro";
 import SketchDivider from "../../components/ui/SketchDivider.astro";
 import SketchArrow from "../../components/ui/SketchArrow";
+import WritingCategory from "../../components/WritingCategory.astro";
 import {
   getPublishedPosts,
   formatPostDate,
@@ -45,7 +46,9 @@ const posts = await getPublishedPosts();
                     </a>
                   </h2>
                   <p>{post.data.description}</p>
-                  <div class="writing-entry-details" />
+                  <div class="writing-entry-details">
+                    <WritingCategory category={post.data.category} />
+                  </div>
                 </div>
                 <span class="writing-entry-time">
                   {readingTime(post.body)} min read

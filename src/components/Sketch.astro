@@ -18,6 +18,13 @@ import {
 } from "../lib/blog";
 
 const homeContent = await getEntry("home", "home");
+const publishedPosts = await getPublishedPosts();
+const projectStories = new Map<string, string>();
+for (const post of publishedPosts) {
+  if (post.data.category === "Project" && post.data.projectId) {
+    projectStories.set(post.data.projectId, postUrl(post.id));
+  }
+}
 const projects = (await getCollection("projects"))
   .sort((a, b) => b.data.created_at.getTime() - a.data.created_at.getTime())
   .slice(0, 10)
@@ -31,6 +38,7 @@ const projects = (await getCollection("projects"))
     demo: data.live_url,
     featured: data.is_featured,
     image: data.image,
+    storyUrl: projectStories.get(id),
     status: data.is_featured
       ? "Featured"
       : String(data.created_at.getUTCFullYear()),
@@ -38,7 +46,7 @@ const projects = (await getCollection("projects"))
 const featuredProjects = projects
   .filter((project) => project.featured)
   .slice(0, 3);
-const latestPosts = (await getPublishedPosts()).slice(0, 3);
+const latestPosts = publishedPosts.slice(0, 3);
 ---
 
 <div class="sketch-page">
@@ -117,8 +125,12 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3);
           </div>
         </div>
 
-        <div class="chapter">
-          <h3><span>Projects</span></h3>
+        <div
+          class="chapter"
+          id="home-projects"
+          aria-labelledby="home-projects-heading"
+        >
+          <h3 id="home-projects-heading"><span>Featured Projects</span></h3>
           <FeaturedProjects projects={featuredProjects} />
           <div class="load-more-btn">
             <SketchButton
@@ -161,10 +173,10 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3);
       roughness: 0.8,
       boil: 0.2,
       fill: "#2724d1",
-    })
+    }),
   );
   initializeSketches("[data-drawably-highlight]", (el) =>
-    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 })
+    drawablyHighlight(el, { roughness: 0.8, boil: 0.2 }),
   );
 </script>
 

@@ -79,6 +79,9 @@ const blog = defineCollection({
     category: z
       .enum(["Project", "Learning", "Story", "Writing"])
       .default("Writing"),
+    projectId: z.string().optional(),
+    repository: z.url().optional(),
+    demo: z.url().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
   }),
