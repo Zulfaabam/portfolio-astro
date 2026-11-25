@@ -4,6 +4,7 @@ import techCsv from "../content/tech_stack.csv?raw";
 import projectTechCsv from "../content/project_tech_stack.csv?raw";
 import ExternalLink from "./ui/ExternalLink.astro";
 import TechBadge from "./ui/TechBadge.astro";
+import SketchArrow from "./ui/SketchArrow";
 
 interface Props {
   projects: {
@@ -23,7 +24,7 @@ const technologies: { id: string; name: string }[] = parse(techCsv, {
 });
 const relations: { project_id: string; tech_stack_id: string }[] = parse(
   projectTechCsv,
-  { columns: true, skip_empty_lines: true },
+  { columns: true, skip_empty_lines: true }
 );
 const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
 ---
@@ -75,7 +76,10 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
                   href={project.storyUrl}
                   aria-label={`Read the ${project.title} story`}
                 >
-                  Read story
+                  <span>Read story</span>
+                  <span>
+                    <SketchArrow />
+                  </span>
                 </a>
               )}
             </div>
@@ -133,13 +137,13 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
   import { initializeSketches } from "./ui/initializeSketches";
 
   initializeSketches("[data-project-frame]", (element) =>
-    drawablyCard(element, { roughness: 0.8, boil: 0.2 }),
+    drawablyCard(element, { roughness: 0.8, boil: 0.2 })
   );
 
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     const button = event.target.closest<HTMLButtonElement>(
-      "[data-featured-select]",
+      "[data-featured-select]"
     );
     const showcase = button?.closest("[data-featured-projects]");
     if (!button || !showcase) return;
@@ -244,6 +248,9 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
   }
   .project-story-link {
     color: var(--color-text-link);
+  }
+  .project-story-link:hover {
+    text-decoration: underline;
   }
   .project-links {
     display: flex;
