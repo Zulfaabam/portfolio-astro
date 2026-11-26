@@ -5,6 +5,7 @@ import projectTechCsv from "../content/project_tech_stack.csv?raw";
 import ExternalLink from "./ui/ExternalLink.astro";
 import TechBadge from "./ui/TechBadge.astro";
 import SketchArrow from "./ui/SketchArrow";
+import SketchButton from "./ui/SketchButton.astro";
 
 interface Props {
   projects: {
@@ -100,35 +101,51 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
       ))
     }
   </div>
-  <div
-    class="project-picker"
-    data-project-frame
-    role="group"
-    aria-label="Choose a featured project"
-  >
-    {
-      projects.map((project, index) => (
-        <button
-          type="button"
-          class="project-thumbnail"
-          data-featured-select={project.id}
-          aria-pressed={index === 0 ? "true" : "false"}
-          aria-controls={`featured-${project.id}`}
-          aria-label={`Show ${project.title}`}
-        >
-          <img
-            src={project.image}
-            alt=""
-            width="320"
-            height="180"
-            loading="lazy"
-          />
-          <span class="active-label" aria-hidden="true">
-            Active
-          </span>
-        </button>
-      ))
-    }
+  <div class="project-picker-container">
+    <div
+      class="project-picker"
+      data-project-frame
+      role="group"
+      aria-label="Choose a featured project"
+    >
+      {
+        projects.map((project, index) => (
+          <button
+            type="button"
+            class="project-thumbnail"
+            data-featured-select={project.id}
+            aria-pressed={index === 0 ? "true" : "false"}
+            aria-controls={`featured-${project.id}`}
+            aria-label={`Show ${project.title}`}
+          >
+            <img
+              src={project.image}
+              alt=""
+              width="320"
+              height="180"
+              loading="lazy"
+            />
+            <span class="active-label" aria-hidden="true">
+              Active
+            </span>
+          </button>
+        ))
+      }
+    </div>
+    <div class="load-more-btn">
+      <SketchButton
+        variant="outline"
+        data-dialog-trigger="project-notes"
+        data-dialog-page="0"
+        aria-haspopup="dialog"
+        aria-controls="project-notes"
+        disabled={projects.length === 0}
+        size="small"
+        roughness={0.6}
+      >
+        View more
+      </SketchButton>
+    </div>
   </div>
 </div>
 
@@ -284,6 +301,13 @@ const techNames = new Map(technologies.map((tech) => [tech.id, tech.name]));
     list-style: none;
     margin: 0.75rem 0 0;
     padding: 0;
+  }
+  .project-picker-container {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .load-more-btn {
+    margin-inline-start: auto;
   }
   .project-picker {
     display: grid;
